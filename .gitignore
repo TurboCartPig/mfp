@@ -56,5 +56,6 @@ _deps
 
 # Repo specific stuff
 
+.vscode/
 build/
 *.pdf
