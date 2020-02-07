@@ -1,3 +1,12 @@
+/**
+ * A boids implemantation based on "Boids" (http://www.red3d.com/cwr/boids/) by Reynolds
+ * and the course material.
+ *
+ * @author Dennis Kristiansen
+ * @file boids.cpp
+ * @date 1.2.2020
+ */
+
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -11,7 +20,7 @@
 
 const unsigned int windowx = 1000;
 const unsigned int windowy = 1000;
-const unsigned int num_obj = 100;
+const unsigned int num_obj = 50;
 
 // Globals
 // ***********************************************************************
@@ -35,6 +44,13 @@ private:
 	sf::Vector2f computeSeparation();
 	sf::Vector2f computeAlignment();
 
+	sf::Vector2f steer(sf::Vector2f dir);
+
+	// Max speed of the boid
+	const float maxspeed = 50.0f;
+	// Max force a rule can apply
+	const float maxforce = 0.03;
+
 	sf::Vector2f pos;
 	sf::Vector2f vel;
 	sf::CircleShape shape;
@@ -46,10 +62,18 @@ private:
 /**
  * Returns the lenght of the given vector.
  */
-float length(sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
+float length(const sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
+
+sf::Vector2f clamp(const sf::Vector2f v, float len) {
+	if (length(v) > len) {
+		return len * v / length(v);
+	} else
+		return v;
+}
 
 /**
  * Computes whether or not a boid is visible from another.
+ * This function only considers visibility based on angle.
  *
  * @param a - The first boid.
  * @param b - The second boid.
@@ -57,42 +81,54 @@ float length(sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
  */
 bool visible(const Boid *a, const Boid *b) {
 	auto vel = a->getVelocity();
-	vel /= length(a->getVelocity()); // Normalize
+	auto a_angle = atan2(vel.y, vel.x);
 
 	auto diff = b->getPosition() - a->getPosition();
-	auto dist = length(diff);
-	diff /= dist;					 // Normalize
+	auto b_angle = atan2(diff.y, diff.x);
 
-	auto angle_to_b = atan2(vel.y, vel.x) - atan2(diff.y, diff.x);
+	auto angle = b_angle - a_angle;
 
-	/* auto ret = (dist < 100.0f */
-	/* 			|| angle_to_b > M_PI * 2.0f */
-	/* 			|| angle_to_b < -M_PI * 2.0f) */
-	/* 		    && dist != 0.0f; */ 
+	auto vis = angle < M_PI_2 && angle > -M_PI_2;
 
-	auto ret = dist < 100.0f && dist > 0.0f;
+	/* std::cout << "Angle a: " << a_angle */
+	/*  		  << " b: " << b_angle */
+	/*  		  << " vis: " << vis */
+	/*  		  << "\n"; */
 
-	return ret;
+	return vis;
 }
 
 // Boid impl
 // ***********************************************************************
 
+/**
+ * Construct a boid
+ *
+ * Initializes the boid with a random position and velocity.
+ */
 Boid::Boid() {
 	pos = sf::Vector2f(rnd() * windowx / 2.0f, rnd() * windowy / 2.0f);
-	vel = sf::Vector2f(rnd() * 50.0f, rnd() * 50.0f);
+	auto angle = (rnd() + 1.0f) * M_PI;
+	vel = sf::Vector2f(maxspeed * cos(angle), maxspeed * sin(angle));
 	shape = sf::CircleShape(10.0f, 3);
-	shape.setPosition(pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
+	shape.setPosition(
+			pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
 	shape.setFillColor(sf::Color::Red);
 }
 
+/**
+ * Update the internal state of the boid
+ *
+ * @param dt - Delta time, time since last update.
+ */
 void Boid::update(float dt) {
 	auto v1 = computeCohesion();
 	auto v2 = computeSeparation();
 	auto v3 = computeAlignment();
 
-	/* vel = 50.0f * vel / length(vel); */
-	vel += 0.0f * v1 + 1.5f * v2 + 1.0f * v3;
+	vel += 0.6f * v1 + 1.5f * v2 + 0.5f * v3;
+	if (length(vel) > maxspeed)
+		vel /= length(vel) / maxspeed;
 
 	pos += vel * dt;
 
@@ -109,9 +145,15 @@ void Boid::update(float dt) {
 
 }
 
+/**
+ * Draw the boid.
+ */
 void Boid::draw(sf::RenderWindow &w) {
-	shape.setPosition(pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
+	// Update position and rotation of the boid
+	shape.setPosition(
+			pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
 	auto nvel = vel / length(vel);
+
 	// 210 was found using experimentation
 	shape.setRotation(atan2(nvel.y, nvel.x) / M_PI * 180.0f + 210.0f);
 
@@ -126,56 +168,110 @@ sf::Vector2f Boid::getVelocity() const {
 	return vel;
 }
 
+/**
+ * Reynolds steering function.
+ * 
+ * @param dir - Desired direction.
+ * @return    - Direction to steer.
+ *
+ * @see "Steering Behaviors For Autonomous Characters",
+ * http://www.red3d.com/cwr/steer/gdc99/
+ */
+sf::Vector2f Boid::steer(const sf::Vector2f dir) {
+		auto ret = maxspeed * dir / length(dir);
+		ret -= vel;
+		ret = clamp(ret, maxforce);
+
+		return ret;
+}
+
+/**
+ * Compute the steering vector based on the cohesion rule.
+ */
 sf::Vector2f Boid::computeCohesion() {
 	auto avg_pos = sf::Vector2f(0.0f, 0.0f);
 	size_t num_vis = 0;
 
-	for (size_t i = 0; i < num_obj; i++) {
-		if (visible(this, gBoids[i])) {
-			auto other = gBoids[i]->getPosition();
-			avg_pos += other / length(other);
+	for (auto other : gBoids) {
+		if (visible(this, other)) {
+		/* if (true) { */
+			auto other_pos = other->getPosition();
+			/* avg_pos += other_pos / length(other_pos); */
+			avg_pos += other_pos;
 			num_vis++;
+
+			/* std::cout << "Cohering: \n" */
+			/* 	      << "ret: " << avg_pos.x << ", " << avg_pos.y */
+			/* 		  << " count: " << num_vis */
+			/* 		  << "\n"; */
 		}
 	}
 
-	if (num_vis > 0)
-		return (avg_pos / (float)num_vis - pos);
-	else
+	// Get the average vector
+	avg_pos /= (float)num_vis;
+
+	// Avoid dividing by zero
+	if (num_vis > 0) {
+		return steer(avg_pos);
+	} else
 		return sf::Vector2f(0.0f, 0.0f);
 }
 
+/**
+ * Compute the steering vector based on the separation rule.
+ */
 sf::Vector2f Boid::computeSeparation() {
 	auto ret = sf::Vector2f(0.0f, 0.0f);
 	size_t num_vis = 0;
 
-	for (size_t i = 0; i < num_obj; i++) {
-		auto dis = length(gBoids[i]->getPosition() - pos);
-		if (visible(this, gBoids[i])) {
-			auto diff = pos - gBoids[i]->getPosition();
-			/* diff /= dis; */
-			diff /= dis;
-
+	for (auto other : gBoids) {
+		auto diff = pos - other->getPosition();
+		auto dist = length(diff);
+		if (visible(this, other) && dist > 0.0f && dist < 200.0f) {
+			diff /= dist;
 			ret += diff;
 			num_vis++;
-			std::cout << "Separating: \n"
-					  << "diff: " << diff.x << ", " << diff.y
-					  << " dis: " << dis
-					  << " ret: " << ret.x << ", " << ret.y
-					  << " count: " << num_vis
-					  << "\n";
+
+			/* std::cout << "Separating: \n" */
+			/* 		  << "diff: " << diff.x << ", " << diff.y */
+			/* 		  << " dis: " << dist */
+			/* 		  << " ret: " << ret.x << ", " << ret.y */
+			/* 		  << " count: " << num_vis */
+			/* 		  << "\n"; */
 		}
 	}
 
-	if (num_vis > 0)
-		return (ret / (float)num_vis);
-	else
+	// Get the average vector
+	ret /= (float)num_vis;
+
+	if (num_vis > 0) {
+		return steer(ret);
+	} else
 		return sf::Vector2f(0.0f, 0.0f);
 }
 
+/**
+ * Compute the steering vector based on the alignment rule.
+ */
 sf::Vector2f Boid::computeAlignment() {
 	auto ret = sf::Vector2f(0.0f, 0.0f);
+	size_t num_vis = 0;
+	
+	for (auto other : gBoids) {
+		auto dist = length(pos - other->getPosition());
+		if (dist > 0.0f && dist < 150.0f) {
+			ret += other->getVelocity();
+			num_vis++;
+		}
+	}
 
-	return ret;
+	// Get the average vector
+	ret /= (float)num_vis;
+
+	if (num_vis > 0)
+		return steer(ret);
+	else
+		return sf::Vector2f(0.0f, 0.0f);
 }
 
 // Main
