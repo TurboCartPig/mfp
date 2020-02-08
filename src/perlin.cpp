@@ -60,9 +60,9 @@ float dot(sf::Vector2f a, sf::Vector2f b) {
 	return a.x * b.x + a.y * b.y;
 }
 
-// float clamp
-float clamp(float a, float ma, float mi) {
-	return fmax(fmin(a, mi), ma);
+template<class T>
+T clamp(T a, T min, T max) {
+	return (a > max) ? max : (a < min) ? min : a;
 }
 
 // Perlin impl from https://thebookofshaders.com
@@ -210,6 +210,12 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
+	sf::Image dumb;
+	if (!dumb.loadFromFile("../dumb.png")) {
+		std::cout << "Error: Texture not created" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
 	// Create table of pixels
 	// times 4 because pixels = (red, green, blue, alpha)
 	uint8_t* pixels = new uint8_t[windowx * windowy * 4];
@@ -218,10 +224,11 @@ int main() {
 	// *******************************************************************
 	for (size_t x = 0; x < windowx; x++) {
 		for (size_t y = 0; y < windowy; y++) {
+			auto c = dumb.getPixel(x, y);
 			uint8_t e = perlin3(sf::Vector2f(x, y)) * 255;
-			pixels[4*(x+y*windowx)  ] = e;
-			pixels[4*(x+y*windowx)+1] = e;
-			pixels[4*(x+y*windowx)+2] = e;
+			pixels[4*(x+y*windowx)  ] = clamp(c.r + e, 0, 255);
+			pixels[4*(x+y*windowx)+1] = clamp(c.g + e, 0, 255);
+			pixels[4*(x+y*windowx)+2] = clamp(c.b + e, 0, 255);
 			pixels[4*(x+y*windowx)+3] = 255; // Should always be 255!!!
 		}
 	}
