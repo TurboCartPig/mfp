@@ -22,7 +22,7 @@
 
 const unsigned int windowx = 1000;
 const unsigned int windowy = 1000;
-const unsigned int num_obj = 50;
+const unsigned int num_obj = 100;
 
 // Globals
 // ***********************************************************************
@@ -51,7 +51,9 @@ private:
 	// Max speed of the boid
 	const float maxspeed = 50.0f;
 	// Max force a rule can apply
-	const float maxforce = 0.03;
+	const float maxforce = 0.5f;
+	const float cohesiondist = 150.0f;
+	const float separationdist = 100.0f;
 
 	sf::Vector2f pos;
 	sf::Vector2f vel;
@@ -66,11 +68,19 @@ private:
  */
 float length(const sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
 
-sf::Vector2f clamp(const sf::Vector2f v, float len) {
+/**
+ * Limit a vectors magnitude.
+ *
+ * @param v   - The vector
+ * @param len - The max lenght of the vector
+ * @return    - The vector now with a magnitude shorter or equaly to len
+ */
+sf::Vector2f limit(const sf::Vector2f v, float len) {
 	if (length(v) > len) {
 		return len * v / length(v);
-	} else
+	} else {
 		return v;
+	}
 }
 
 /**
@@ -128,9 +138,13 @@ void Boid::update(float dt) {
 	auto v2 = computeSeparation();
 	auto v3 = computeAlignment();
 
-	vel += 0.6f * v1 + 1.5f * v2 + 0.5f * v3;
-	if (length(vel) > maxspeed)
-		vel /= length(vel) / maxspeed;
+	/* vel += 0.6f * v1 + 1.5f * v2 + 0.5f * v3; */
+
+	auto acc = 1.0f * v1 + 2.5f * v2 + 1.0f * v3;
+
+	vel += acc;
+
+	vel = maxspeed * vel / length(vel);
 
 	pos += vel * dt;
 
@@ -149,6 +163,8 @@ void Boid::update(float dt) {
 
 /**
  * Draw the boid.
+ *
+ * @param w - The SFML window that does the actual drawing
  */
 void Boid::draw(sf::RenderWindow &w) {
 	// Update position and rotation of the boid
@@ -174,32 +190,28 @@ sf::Vector2f Boid::getVelocity() const {
  * Reynolds steering function.
  * 
  * @param dir - Desired direction.
- * @return    - Direction to steer.
+ * @return    - Direction to steer scaled to maxforce.
  *
  * @see "Steering Behaviors For Autonomous Characters",
  * http://www.red3d.com/cwr/steer/gdc99/
  */
 sf::Vector2f Boid::steer(const sf::Vector2f dir) {
-		auto ret = maxspeed * dir / length(dir);
-		ret -= vel;
-		ret = clamp(ret, maxforce);
-
-		return ret;
+		auto ret = maxspeed * dir / length(dir) - vel;
+		return limit(ret, maxforce);
 }
 
 /**
  * Compute the steering vector based on the cohesion rule.
  */
 sf::Vector2f Boid::computeCohesion() {
-	auto avg_pos = sf::Vector2f(0.0f, 0.0f);
+	auto ret = sf::Vector2f(0.0f, 0.0f);
 	size_t num_vis = 0;
 
 	for (auto other : gBoids) {
-		if (visible(this, other)) {
-		/* if (true) { */
-			auto other_pos = other->getPosition();
-			/* avg_pos += other_pos / length(other_pos); */
-			avg_pos += other_pos;
+		auto dist = length(other->getPosition() - pos);
+		/* if (visible(this, other)) { */
+		if (dist > 0.0f && dist < cohesiondist) {
+			ret += other->getPosition();
 			num_vis++;
 
 			/* std::cout << "Cohering: \n" */
@@ -210,11 +222,11 @@ sf::Vector2f Boid::computeCohesion() {
 	}
 
 	// Get the average vector
-	avg_pos /= (float)num_vis;
+	ret /= (float)num_vis;
 
 	// Avoid dividing by zero
 	if (num_vis > 0) {
-		return steer(avg_pos);
+			return steer(ret);
 	} else
 		return sf::Vector2f(0.0f, 0.0f);
 }
@@ -229,7 +241,9 @@ sf::Vector2f Boid::computeSeparation() {
 	for (auto other : gBoids) {
 		auto diff = pos - other->getPosition();
 		auto dist = length(diff);
-		if (visible(this, other) && dist > 0.0f && dist < 200.0f) {
+		/* if (visible(this, other) && dist > 0.0f && dist < separationdist) { */
+		if (dist > 0.0f && dist < separationdist) {
+			// FIXME: This should scale vectors based on distance. Closer boids should give greator reaction
 			diff /= dist;
 			ret += diff;
 			num_vis++;
