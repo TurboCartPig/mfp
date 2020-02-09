@@ -184,7 +184,8 @@ int main() {
 	rnd = std::bind(distribution, generator);
 
 	// Setup seedgrid
-	gSeedgrid = std::vector<sf::Vector2f>(SG_SIZE * SG_SIZE);
+	/* gSeedgrid = std::vector<sf::Vector2f>(SG_SIZE * SG_SIZE); */
+	gSeedgrid.resize(SG_SIZE * SG_SIZE);
 	for (size_t i = 0; i < SG_SIZE * SG_SIZE; i++) {
 		auto r = (rnd() + 1.0f) * M_PI;
 		gSeedgrid[i] = sf::Vector2f(cos(r), sin(r));
