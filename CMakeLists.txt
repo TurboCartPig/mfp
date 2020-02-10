@@ -1,25 +1,24 @@
 cmake_minimum_required(VERSION 3.5)
-project(SFMLTing LANGUAGES CXX)
+project(MFP LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
-	add_compile_options(-Wall -Wextra -Wunreachable-code -Wpedantic)
-endif()
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	add_compile_options(-Wweak-vtables -Wexit-time-destructors -Wglobal-constructors -Wmissing-noreturn )
-endif()
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(/W4 /w44265 /w44061 /w44062 )
-endif()
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(SFML REQUIRED COMPONENTS audio graphics window system)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang | GNU")
+	add_compile_options(-Wall -Wextra -Wunreachable-code -Wpedantic)
+endif()
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang")
+	add_compile_options(-Wweak-vtables -Wexit-time-destructors -Wglobal-constructors -Wmissing-noreturn)
+endif()
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	add_compile_options(/W4 /w44265 /w44061 /w44062)
+endif()
 
-include_directories(${SFML_INCLUDE_DIR})
+find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
+
+# include_directories(${SFML_INCLUDE_DIR})
 
 add_executable(solar src/solar.cpp)
 target_link_libraries(solar sfml-graphics)
