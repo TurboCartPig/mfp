@@ -26,17 +26,13 @@ std::function<float()> rnd;
 /**
  * Linear interpolation between two points.
  *
- * @param p_0 - The first point.
- * @param p_1 - The second point.
- * @param t   - t decides the degree of interpolation from p_0 to p_1.
- * @return    - The result of the interpolation.
+ * @param a - The first point.
+ * @param a - The second point.
+ * @param t - t decides the degree of interpolation from a to b.
+ * @return  - The result of the interpolation.
  */
-sf::Vector2f lerp(sf::Vector2f a, sf::Vector2f b, float t) {
-	return (1.0f - t) * a + t * b;
-}
-
-// float lerp
-float lerp(float a, float b, float t) {
+template<class T>
+T lerp(T a, T b, float t) {
 	return (1.0f - t) * a + t * b;
 }
 
@@ -45,21 +41,30 @@ sf::Vector2f floor(sf::Vector2f a) {
 	return sf::Vector2f(floor(a.x), floor(a.y));
 }
 
-// float fraction
-float fract(float a) {
-	return a - floor(a);
-}
-
-// vector fraction
-sf::Vector2f fract(sf::Vector2f a) {
-	return a - floor(a);
-}
-
 // vector dot pruduct
 float dot(sf::Vector2f a, sf::Vector2f b) {
 	return a.x * b.x + a.y * b.y;
 }
 
+/**
+ * Fraction. Get the fraction part of a type.
+ *
+ * @param a - Var to get fraction from
+ * @return  - The fraction part of the input
+ */
+template<class T>
+T fract(T a) {
+	return a - floor(a);
+}
+
+/**
+ * Clamp input to given range.
+ *
+ * @param a   - Param to clamp
+ * @param min - Minimum bound of the range
+ * @param max - Maximum bound of the range
+ * @return    - The clamped value
+ */
 template<class T>
 T clamp(T a, T min, T max) {
 	return (a > max) ? max : (a < min) ? min : a;
@@ -184,7 +189,6 @@ int main() {
 	rnd = std::bind(distribution, generator);
 
 	// Setup seedgrid
-	/* gSeedgrid = std::vector<sf::Vector2f>(SG_SIZE * SG_SIZE); */
 	gSeedgrid.resize(SG_SIZE * SG_SIZE);
 	for (size_t i = 0; i < SG_SIZE * SG_SIZE; i++) {
 		auto r = (rnd() + 1.0f) * M_PI;
@@ -203,6 +207,8 @@ int main() {
 
 	// Screenshot
 	sf::Image capture;
+	sf::Texture capture_texture;
+	sf::Vector2u windowSize = window.getSize();
 
 	sf::Texture texture;
 	// Create texture
@@ -236,12 +242,29 @@ int main() {
 
 	texture.update(pixels);
 
+	auto center = sf::Vector2f(windowx / 2, windowy / 2);
+	auto resolution = 260.0f;
+	auto intensity = 30;
+	auto radius = 550.0f;
+	size_t c = 0;
+	auto circle = sf::VertexArray(sf::PrimitiveType::LineStrip, (size_t)resolution + 1);
+
+	for (float i = 0; i <= 2.0 * M_PI; i += 2.0 * M_PI / resolution) {
+		auto val = perlin2(sf::Vector2f(cos(i) * intensity, sin(i) * intensity) + sf::Vector2f(500, 500), 8);
+
+		auto x = cos(i) * radius * val;
+		auto y = sin(i) * radius * val;
+
+		circle[c++].position = sf::Vector2f(x, y) + center;
+	}
+
+	// Assign the last point to the position of the first
+	circle[c++].position = circle[0].position;
+
 	// Create a sprite and assign texture
 	sf::Sprite sprite;
 	sprite.setTexture(texture);
 
-	float t = 0.0f;
-	float inc = 1.0f;
 	sf::Clock clock;
 	clock.restart();
 
@@ -257,7 +280,9 @@ int main() {
 					break;
 
 				case sf::Event::KeyPressed:
-					capture.create(windowx, windowy, pixels);
+					capture_texture.create(windowSize.x, windowSize.y);
+					capture_texture.update(window);
+					capture = capture_texture.copyToImage();
 					capture.saveToFile("output.png");
 					break;
 
@@ -267,30 +292,12 @@ int main() {
 		}
 
 		float dt = clock.restart().asSeconds();
-		t += inc * dt;
-
-		if (t > 3.0f || t < 0.0f)
-			inc = -1.0f * inc;
-
-		// Experiment with using time as a variable in noise
-		/* // Generate an image from noise */
-		/* // ******************************************************************* */
-		/* for (size_t x = 0; x < windowx; x++) { */
-		/* 	for (size_t y = 0; y < windowy; y++) { */
-		/* 		uint8_t e = perlin3(sf::Vector2f(x, y), t) * 255; */
-		/* 		pixels[4*(x+y*windowx)  ] = e; */
-		/* 		pixels[4*(x+y*windowx)+1] = e / 2; */
-		/* 		pixels[4*(x+y*windowx)+2] = e / 3; */
-		/* 		pixels[4*(x+y*windowx)+3] = 255; // Should always be 255!!! */
-		/* 	} */
-		/* } */
-
-		/* texture.update(pixels); */
 
 		// Rendering
 		window.clear();
 
-		window.draw(sprite);
+		/* window.draw(sprite); */
+		window.draw(circle);
 
 		window.display();
 	}
