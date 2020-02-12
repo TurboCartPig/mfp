@@ -1,5 +1,6 @@
 /**
- * A boids implemantation based on "Boids" (http://www.red3d.com/cwr/boids/) by Reynolds
+ * A boids implemantation based on "Boids",
+ * (http://www.red3d.com/cwr/boids/) by Reynolds,
  * and the course material.
  *
  * @author Dennis Kristiansen
@@ -20,14 +21,16 @@
 // Constants
 // ***********************************************************************
 
-const unsigned int windowx = 1000;
-const unsigned int windowy = 1000;
-const unsigned int num_obj = 100;
+const unsigned int windowx  = 1000;
+const unsigned int windowy  = 1000;
+const unsigned int num_obj  = 100;
+const float        maxangle = 6.0f * M_PI_4;
 
 // Globals
 // ***********************************************************************
 
 std::vector<class Boid*> gBoids;
+std::vector<class Predator*> gPredators;
 std::function<float()> rnd;
 
 // Boid decl
@@ -35,29 +38,35 @@ std::function<float()> rnd;
 
 class Boid {
 public:
-	Boid();
-	void update(float dt);
-	void draw(sf::RenderWindow &w);
-	sf::Vector2f getPosition() const;
-	sf::Vector2f getVelocity() const;
+    Boid();
+    virtual void update(float dt);
+    void draw(sf::RenderWindow &w);
+    sf::Vector2f getPosition() const;
+    sf::Vector2f getVelocity() const;
 
-private:
-	sf::Vector2f computeCohesion();
-	sf::Vector2f computeSeparation();
-	sf::Vector2f computeAlignment();
+protected:
+    sf::Vector2f computeCohesion();
+    sf::Vector2f computeSeparation();
+    sf::Vector2f computeAlignment();
+    sf::Vector2f computeFlee();
+    sf::Vector2f steer(sf::Vector2f dir, float steerforce);
 
-	sf::Vector2f steer(sf::Vector2f dir);
+    const float maxspeed = 80.0f; //< Max speed of the boid
+    const float maxforce = 1.0f; //< Max force to apply per rule
+    const float cohesiondist = 200.0f; //< Max cohesion distance
+    const float separationdist = 80.0f; //< Max separation distance
+    const float alignmentdist = 220.0f; //< Max alignment distance
+    const float fleedist = 300.0f; //< Max flee distance
 
-	// Max speed of the boid
-	const float maxspeed = 50.0f;
-	// Max force a rule can apply
-	const float maxforce = 0.5f;
-	const float cohesiondist = 150.0f;
-	const float separationdist = 100.0f;
+    sf::Vector2f pos;
+    sf::Vector2f vel;
+    sf::CircleShape shape;
+};
 
-	sf::Vector2f pos;
-	sf::Vector2f vel;
-	sf::CircleShape shape;
+class Predator : public Boid {
+public:
+    Predator();
+    void update(float dt) override;
 };
 
 // Helper functions
@@ -76,11 +85,11 @@ float length(const sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
  * @return    - The vector now with a magnitude shorter or equaly to len
  */
 sf::Vector2f limit(const sf::Vector2f v, float len) {
-	if (length(v) > len) {
-		return len * v / length(v);
-	} else {
-		return v;
-	}
+    if (length(v) > len) {
+        return len * v / length(v);
+    } else {
+        return v;
+    }
 }
 
 /**
@@ -92,22 +101,15 @@ sf::Vector2f limit(const sf::Vector2f v, float len) {
  * @return  - Is the boid b visible from boid a?
  */
 bool visible(const Boid *a, const Boid *b) {
-	auto vel = a->getVelocity();
-	auto a_angle = atan2(vel.y, vel.x);
+    auto vel = a->getVelocity();
+    auto a_angle = atan2(vel.y, vel.x);
 
-	auto diff = b->getPosition() - a->getPosition();
-	auto b_angle = atan2(diff.y, diff.x);
+    auto diff = b->getPosition() - a->getPosition();
+    auto b_angle = atan2(diff.y, diff.x);
 
-	auto angle = b_angle - a_angle;
+    auto angle = b_angle - a_angle;
 
-	auto vis = angle < M_PI_2 && angle > -M_PI_2;
-
-	/* std::cout << "Angle a: " << a_angle */
-	/*  		  << " b: " << b_angle */
-	/*  		  << " vis: " << vis */
-	/*  		  << "\n"; */
-
-	return vis;
+    return angle < maxangle && angle > -maxangle;
 }
 
 // Boid impl
@@ -119,13 +121,13 @@ bool visible(const Boid *a, const Boid *b) {
  * Initializes the boid with a random position and velocity.
  */
 Boid::Boid() {
-	pos = sf::Vector2f(rnd() * windowx / 2.0f, rnd() * windowy / 2.0f);
-	auto angle = (rnd() + 1.0f) * M_PI;
-	vel = sf::Vector2f(maxspeed * cos(angle), maxspeed * sin(angle));
-	shape = sf::CircleShape(10.0f, 3);
-	shape.setPosition(
-			pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
-	shape.setFillColor(sf::Color::Red);
+    pos = sf::Vector2f(rnd() * windowx / 2.0f, rnd() * windowy / 2.0f);
+    auto angle = (rnd() + 1.0f) * M_PI;
+    vel = sf::Vector2f(maxspeed * cos(angle), maxspeed * sin(angle));
+    shape = sf::CircleShape(10.0f, 3);
+    shape.setPosition(
+            pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
+    shape.setFillColor(sf::Color::Red);
 }
 
 /**
@@ -134,30 +136,29 @@ Boid::Boid() {
  * @param dt - Delta time, time since last update.
  */
 void Boid::update(float dt) {
-	auto v1 = computeCohesion();
-	auto v2 = computeSeparation();
-	auto v3 = computeAlignment();
+    auto v1 = computeCohesion();
+    auto v2 = computeSeparation();
+    auto v3 = computeAlignment();
+    auto v4 = computeFlee();
 
-	/* vel += 0.6f * v1 + 1.5f * v2 + 0.5f * v3; */
+    auto acc = 1.75f * v1 + 6.0f * v2 + 0.25f * v3 + 10.0f * v4;
 
-	auto acc = 1.0f * v1 + 2.5f * v2 + 1.0f * v3;
+    vel += acc;
 
-	vel += acc;
+    vel = maxspeed * vel / length(vel);
 
-	vel = maxspeed * vel / length(vel);
+    pos += vel * dt;
 
-	pos += vel * dt;
+    // Wrap around the screen
+    if (pos.x > windowx + shape.getRadius())
+        pos.x -= windowx + shape.getRadius();
+    else if (pos.x < -shape.getRadius())
+        pos.x += windowx + shape.getRadius();
 
-	// Wrap around the screen
-	if (pos.x > windowx + shape.getRadius())
-		pos.x -= windowx + shape.getRadius();
-	else if (pos.x < -shape.getRadius())
-		pos.x += windowx + shape.getRadius();
-
-	if (pos.y > windowy + shape.getRadius())
-		pos.y -= windowy + shape.getRadius();
-	else if (pos.y < -shape.getRadius())
-		pos.y += windowy + shape.getRadius();
+    if (pos.y > windowy + shape.getRadius())
+        pos.y -= windowy + shape.getRadius();
+    else if (pos.y < -shape.getRadius())
+        pos.y += windowy + shape.getRadius();
 
 }
 
@@ -167,23 +168,24 @@ void Boid::update(float dt) {
  * @param w - The SFML window that does the actual drawing
  */
 void Boid::draw(sf::RenderWindow &w) {
-	// Update position and rotation of the boid
-	shape.setPosition(
-			pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
-	auto nvel = vel / length(vel);
+    // Set the position to rotate around
+    shape.setPosition(pos);
+    // 210 was found using experimentation
+    shape.setRotation(atan2(vel.y, vel.x) / M_PI * 180.0f + 210.0f);
 
-	// 210 was found using experimentation
-	shape.setRotation(atan2(nvel.y, nvel.x) / M_PI * 180.0f + 210.0f);
+    // Set the actual position
+    shape.setPosition(
+            pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
 
-	w.draw(shape);
+    w.draw(shape);
 }
 
 sf::Vector2f Boid::getPosition() const {
-	return pos;
+    return pos;
 }
 
 sf::Vector2f Boid::getVelocity() const {
-	return vel;
+    return vel;
 }
 
 /**
@@ -195,172 +197,226 @@ sf::Vector2f Boid::getVelocity() const {
  * @see "Steering Behaviors For Autonomous Characters",
  * http://www.red3d.com/cwr/steer/gdc99/
  */
-sf::Vector2f Boid::steer(const sf::Vector2f dir) {
-		auto ret = maxspeed * dir / length(dir) - vel;
-		return limit(ret, maxforce);
+sf::Vector2f Boid::steer(const sf::Vector2f dir, float steerforce) {
+    auto ret = maxspeed * dir / length(dir) - vel;
+    return limit(ret, steerforce);
 }
 
 /**
  * Compute the steering vector based on the cohesion rule.
  */
 sf::Vector2f Boid::computeCohesion() {
-	auto ret = sf::Vector2f(0.0f, 0.0f);
-	size_t num_vis = 0;
+    auto ret = sf::Vector2f(0.0f, 0.0f);
+    size_t num_vis = 0;
 
-	for (auto other : gBoids) {
-		auto dist = length(other->getPosition() - pos);
-		/* if (visible(this, other)) { */
-		if (dist > 0.0f && dist < cohesiondist) {
-			ret += other->getPosition();
-			num_vis++;
+    for (auto other : gBoids) {
+        auto dist = length(other->getPosition() - pos);
+        if (dist > 0.0f && dist < cohesiondist && visible(this, other)) {
+            ret += other->getPosition();
+            num_vis++;
+        }
+    }
 
-			/* std::cout << "Cohering: \n" */
-			/* 	      << "ret: " << avg_pos.x << ", " << avg_pos.y */
-			/* 		  << " count: " << num_vis */
-			/* 		  << "\n"; */
-		}
-	}
+    // Get the average vector
+    ret /= (float) num_vis;
 
-	// Get the average vector
-	ret /= (float)num_vis;
-
-	// Avoid dividing by zero
-	if (num_vis > 0) {
-			return steer(ret);
-	} else
-		return sf::Vector2f(0.0f, 0.0f);
+    // Avoid dividing by zero
+    if (num_vis > 0)
+        return steer(ret, maxforce);
+    else
+        return sf::Vector2f(0.0f, 0.0f);
 }
 
 /**
  * Compute the steering vector based on the separation rule.
  */
 sf::Vector2f Boid::computeSeparation() {
-	auto ret = sf::Vector2f(0.0f, 0.0f);
-	size_t num_vis = 0;
+    auto ret = sf::Vector2f(0.0f, 0.0f);
+    size_t num_vis = 0;
 
-	for (auto other : gBoids) {
-		auto diff = pos - other->getPosition();
-		auto dist = length(diff);
-		/* if (visible(this, other) && dist > 0.0f && dist < separationdist) { */
-		if (dist > 0.0f && dist < separationdist) {
-			// FIXME: This should scale vectors based on distance. Closer boids should give greator reaction
-			diff /= dist;
-			ret += diff;
-			num_vis++;
+    for (auto other : gBoids) {
+        auto diff = pos - other->getPosition();
+        auto dist = length(diff);
+        if (dist > 0.0f && dist < separationdist && visible(this, other)) {
+            // FIXME: This should scale vectors based on distance. Closer boids should give greator reaction
+            diff /= dist;
+            diff /= dist;
+            ret += diff;
+            num_vis++;
+        }
+    }
 
-			/* std::cout << "Separating: \n" */
-			/* 		  << "diff: " << diff.x << ", " << diff.y */
-			/* 		  << " dis: " << dist */
-			/* 		  << " ret: " << ret.x << ", " << ret.y */
-			/* 		  << " count: " << num_vis */
-			/* 		  << "\n"; */
-		}
-	}
+    // Get the average vector
+    ret /= (float) num_vis;
 
-	// Get the average vector
-	ret /= (float)num_vis;
-
-	if (num_vis > 0) {
-		return steer(ret);
-	} else
-		return sf::Vector2f(0.0f, 0.0f);
+    if (num_vis > 0)
+        return steer(ret, maxforce);
+    else
+        return sf::Vector2f(0.0f, 0.0f);
 }
 
 /**
  * Compute the steering vector based on the alignment rule.
  */
 sf::Vector2f Boid::computeAlignment() {
-	auto ret = sf::Vector2f(0.0f, 0.0f);
-	size_t num_vis = 0;
-	
-	for (auto other : gBoids) {
-		auto dist = length(pos - other->getPosition());
-		if (dist > 0.0f && dist < 150.0f) {
-			ret += other->getVelocity();
-			num_vis++;
-		}
-	}
+    auto ret = sf::Vector2f(0.0f, 0.0f);
+    size_t num_vis = 0;
 
-	// Get the average vector
-	ret /= (float)num_vis;
+    for (auto other : gBoids) {
+        auto dist = length(pos - other->getPosition());
+        if (dist > 0.0f && dist < alignmentdist && visible(this, other)) {
+            ret += other->getVelocity();
+            num_vis++;
+        }
+    }
 
-	if (num_vis > 0)
-		return steer(ret);
-	else
-		return sf::Vector2f(0.0f, 0.0f);
+    // Get the average vector
+    ret /= (float) num_vis;
+
+    if (num_vis > 0)
+        return steer(ret, maxforce);
+    else
+        return sf::Vector2f(0.0f, 0.0f);
 }
 
+sf::Vector2f Boid::computeFlee() {
+    auto ret = sf::Vector2f(0.0f, 0.0f);
+    size_t num_vis = 0;
+
+    for (auto other : gPredators) {
+        auto diff = pos - other->getPosition();
+        auto dist = length(diff);
+        if (dist < fleedist && visible(this, other)) {
+            diff /= dist;
+            ret += diff;
+            num_vis++;
+        }
+    }
+
+    // Get the average vector
+    ret /= (float) num_vis;
+
+    if (num_vis > 0) {
+        return steer(ret, 2.0f);
+    } else
+        return sf::Vector2f(0.0f, 0.0f);
+}
+
+// ***********************************************************************
+
+Predator::Predator() {
+    pos = sf::Vector2f(rnd() * windowx / 2.0f, rnd() * windowy / 2.0f);
+    auto angle = (rnd() + 1.0f) * M_PI;
+    vel = sf::Vector2f(maxspeed * cos(angle), maxspeed * sin(angle));
+    shape = sf::CircleShape(20.0f, 3);
+    shape.setPosition(
+            pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
+    shape.setFillColor(sf::Color::Yellow);
+}
+
+// Kan jeg exponere vektene og droppe denne funksjonen?
+// Skal jeg impl jakt og fangst?
+void Predator::update(float dt) {
+    auto v1 = computeCohesion();
+
+    auto acc = 2.0f * v1;
+
+    vel += acc;
+
+    vel = maxspeed * vel / length(vel);
+
+    pos += vel * dt;
+
+    // Wrap around the screen
+    if (pos.x > windowx + shape.getRadius())
+        pos.x -= windowx + shape.getRadius();
+    else if (pos.x < -shape.getRadius())
+        pos.x += windowx + shape.getRadius();
+
+    if (pos.y > windowy + shape.getRadius())
+        pos.y -= windowy + shape.getRadius();
+    else if (pos.y < -shape.getRadius())
+        pos.y += windowy + shape.getRadius();
+}
 // Main
 // ***********************************************************************
 
 int main() {
-	// Init randomness
-	// *******************************************************************
+    // Init randomness
+    // *******************************************************************
 
-	// Generate seed
-	std::string seed_str;
-	std::cout << "Seed string: "; getline(std::cin, seed_str);
-	std::seed_seq seed(seed_str.begin(), seed_str.end());
+    // Generate seed
+    std::string seed_str;
+    std::cout << "Seed string: ";
+    getline(std::cin, seed_str);
+    std::seed_seq seed(seed_str.begin(), seed_str.end());
 
-	// Initialize generator and distribution
-	std::default_random_engine generator(seed);
-	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-	rnd = std::bind(distribution, generator);
+    // Initialize generator and distribution
+    std::default_random_engine generator(seed);
+    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+    rnd = std::bind(distribution, generator);
 
-	// Create window
-	sf::RenderWindow window(
-			sf::VideoMode(windowx, windowy),
-			"Perlin noise"
-		);
-	window.setFramerateLimit(30);
+    // Create window
+    sf::RenderWindow window(
+            sf::VideoMode(windowx, windowy),
+            "Perlin noise"
+    );
+    window.setFramerateLimit(30);
 
-	// Setup boids
-	gBoids.resize(num_obj);
-	for (size_t i = 0; i < num_obj; i++) {
-		gBoids[i] = new Boid();
-	}
+    // Setup boids
+    gBoids.resize(num_obj);
+    for (size_t i = 0; i < num_obj; i++)
+        gBoids[i] = new Boid();
 
-	sf::Clock clock;
-	clock.restart();
+    gPredators.resize(2);
+    for (size_t i = 0; i < 2; i++)
+        gPredators[i] = new Predator();
 
-	// Game loop
-	// *******************************************************************
-	while (window.isOpen()) {
-		// Event handling
-		sf::Event event;
-		while (window.pollEvent(event)) {
-			switch (event.type) {
-				case sf::Event::Closed: 
-					window.close();
-					break;
+    sf::Clock clock;
+    clock.restart();
 
-				default:
-					break;
-			}
-		}
+    // Game loop
+    // *******************************************************************
+    while (window.isOpen()) {
+        // Event handling
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            switch (event.type) {
+                case sf::Event::Closed:
+                    window.close();
+                    break;
 
-		float dt = clock.restart().asSeconds();
+                default:
+                    break;
+            }
+        }
 
-		// Update boids
-		for (auto boid : gBoids) {
-			boid->update(dt);
-		}
+        float dt = clock.restart().asSeconds();
 
-		// Rendering
-		window.clear();
+        // Update boids
+        for (auto boid : gBoids)
+            boid->update(dt);
 
-		// Draw boids
-		for (auto boid : gBoids) {
-			boid->draw(window);
-		}
+        for (auto predator : gPredators)
+            predator->update(dt);
 
-		window.display();
-	}
+        // Rendering
+        window.clear();
 
-	// Cleanup
-	for (auto boid : gBoids) {
-		delete boid;
-	}
+        // Draw boids
+        for (auto boid : gBoids)
+            boid->draw(window);
 
-	return EXIT_SUCCESS;
+        for (auto predator : gPredators)
+            predator->draw(window);
+
+        window.display();
+    }
+
+    // Cleanup
+    for (auto boid : gBoids) {
+        delete boid;
+    }
+
+    return EXIT_SUCCESS;
 }
