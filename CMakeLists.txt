@@ -6,19 +6,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang | GNU")
-	add_compile_options(-Wall -Wextra -Wunreachable-code -Wpedantic)
-endif()
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang")
-	add_compile_options(-Wweak-vtables -Wexit-time-destructors -Wglobal-constructors -Wmissing-noreturn)
-endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	add_compile_options(/W4 /w44265 /w44061 /w44062)
+	add_compile_options(/W4 /w44265 /w44062 /wd4061) # Warnings
+	add_compile_options(/utf-8 /arch:AVX2)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang | GNU")
+	add_compile_options(-Wall -Wextra -Wunreachable-code -Wpedantic -Wdocumentation)
+	add_compile_options(-mtune=generic -march=x86_64 -mavx2)
+	if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang")
+		add_compile_options(-Wweak-vtables -Wexit-time-destructors -Wglobal-constructors -Wmissing-noreturn)
+	endif()
 endif()
 
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
-
-# include_directories(${SFML_INCLUDE_DIR})
 
 add_executable(solar src/solar.cpp)
 target_link_libraries(solar sfml-graphics)
