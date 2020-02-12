@@ -56,7 +56,9 @@ _deps
 
 # Repo specific stuff
 
+*.pdf
 .vscode/
 .idea/
 build/
-*.pdf
+cmake-build-debug/
+cmake-build-release/
