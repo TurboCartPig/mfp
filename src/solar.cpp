@@ -1,3 +1,10 @@
+/**
+ * The solar system assignment.
+ *
+ * @author Dennis Kristiansen
+ * @file solar.cpp
+ */
+
 #define _USE_MATH_DEFINES
 
 #include "SFML/Graphics.hpp"

@@ -1,3 +1,10 @@
+/**
+ * The perlin noise assignment.
+ *
+ * @author Dennis Kristiansen
+ * @file perlin.cpp
+ */
+
 #define _USE_MATH_DEFINES
 
 #include <SFML/Graphics.hpp>

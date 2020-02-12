@@ -21,10 +21,10 @@
 // Constants
 // ***********************************************************************
 
-const unsigned int windowx  = 1000;
-const unsigned int windowy  = 1000;
-const unsigned int num_obj  = 100;
-const float        maxangle = 6.0f * M_PI_4;
+static const uint32_t windowx  = 1000;
+static const uint32_t windowy  = 1000;
+static const uint32_t num_obj  = 100;
+static const float    maxangle = 6.0f * M_PI_4;
 
 // Globals
 // ***********************************************************************
@@ -33,7 +33,7 @@ std::vector<class Boid *>     gBoids;
 std::vector<class Predator *> gPredators;
 std::function<float()>        rnd;
 
-// Boid decl
+// class declarations
 // ***********************************************************************
 
 class Boid {
@@ -51,18 +51,21 @@ class Boid {
 	sf::Vector2f computeFlee();
 	sf::Vector2f steer(sf::Vector2f dir, float steerforce);
 
-	const float maxspeed       = 80.0f;  //< Max speed of the boid
-	const float maxforce       = 1.0f;   //< Max force to apply per rule
-	const float cohesiondist   = 200.0f; //< Max cohesion distance
-	const float separationdist = 80.0f;  //< Max separation distance
-	const float alignmentdist  = 220.0f; //< Max alignment distance
-	const float fleedist       = 300.0f; //< Max flee distance
+	static constexpr float maxspeed     = 80.0f; //< Max speed of the boid
+	static constexpr float maxforce     = 1.0f;  //< Max force to apply per rule
+	static constexpr float cohesiondist = 200.0f;   //< Max cohesion distance
+	static constexpr float separationdist = 80.0f;  //< Max separation distance
+	static constexpr float alignmentdist  = 220.0f; //< Max alignment distance
+	static constexpr float fleedist       = 300.0f; //< Max flee distance
 
 	sf::Vector2f    pos;
 	sf::Vector2f    vel;
 	sf::CircleShape shape;
 };
 
+/**
+ * A Predator that chases boids, but never catches them.
+ */
 class Predator : public Boid {
   public:
 	Predator();
@@ -80,9 +83,9 @@ float length(const sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
 /**
  * Limit a vectors magnitude.
  *
- * @param v   - The vector
- * @param len - The max length of the vector
- * @return    - The vector now with a magnitude shorter or equaly to len
+ * @param v   The vector
+ * @param len The max length of the vector
+ * @return    The vector now with a magnitude shorter or equaly to len
  */
 sf::Vector2f limit(const sf::Vector2f v, float len) {
 	if (length(v) > len) {
@@ -96,9 +99,9 @@ sf::Vector2f limit(const sf::Vector2f v, float len) {
  * Computes whether or not a boid is visible from another.
  * This function only considers visibility based on angle.
  *
- * @param a - The first boid.
- * @param b - The second boid.
- * @return  - Is the boid b visible from boid a?
+ * @param a The first boid.
+ * @param b The second boid.
+ * @return  Is the boid b visible from boid a?
  */
 bool visible(const Boid *a, const Boid *b) {
 	auto vel     = a->getVelocity();
@@ -116,8 +119,6 @@ bool visible(const Boid *a, const Boid *b) {
 // ***********************************************************************
 
 /**
- * Construct a boid
- *
  * Initializes the boid with a random position and velocity.
  */
 Boid::Boid() {
@@ -130,9 +131,9 @@ Boid::Boid() {
 }
 
 /**
- * Update the internal state of the boid
+ * Update the internal state of the boid.
  *
- * @param dt - Delta time, time since last update.
+ * @param dt Delta time, time since last update.
  */
 void Boid::update(float dt) {
 	auto v1 = computeCohesion();
@@ -161,7 +162,7 @@ void Boid::update(float dt) {
 /**
  * Draw the boid.
  *
- * @param w - The SFML window that does the actual drawing
+ * @param w The SFML window that does the actual drawing
  */
 void Boid::draw(sf::RenderWindow &w) {
 	// Set the position to rotate around
@@ -182,8 +183,8 @@ sf::Vector2f Boid::getVelocity() const { return vel; }
 /**
  * Reynolds steering function.
  *
- * @param dir - Desired direction.
- * @return    - Direction to steer scaled to maxforce.
+ * @param dir Desired direction.
+ * @return    Direction to steer scaled to maxforce.
  *
  * @see "Steering Behaviors For Autonomous Characters",
  * http://www.red3d.com/cwr/steer/gdc99/
@@ -271,6 +272,9 @@ sf::Vector2f Boid::computeAlignment() {
 		return sf::Vector2f(0.0f, 0.0f);
 }
 
+/**
+ * Compute the steering vector based on fleeing rule, ie flee if near predator.
+ */
 sf::Vector2f Boid::computeFlee() {
 	auto   ret     = sf::Vector2f(0.0f, 0.0f);
 	size_t num_vis = 0;
@@ -305,8 +309,8 @@ Predator::Predator() {
 	shape.setFillColor(sf::Color::Yellow);
 }
 
-// Kan jeg exponere vektene og droppe denne funksjonen?
-// Skal jeg impl jakt og fangst?
+// TODO: Kan jeg exponere vektene og droppe denne funksjonen?
+// TODO: Skal jeg impl jakt og fangst?
 void Predator::update(float dt) {
 	auto v1 = computeCohesion();
 

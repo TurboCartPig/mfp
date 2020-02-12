@@ -1,3 +1,12 @@
+/**
+ * The interpolation assignment part c.
+ *
+ * See interab.cpp for part a and b.
+ *
+ *  @author Dennis Kristiansen
+ *  @file inter.cpp
+ */
+
 #define _USE_MATH_DEFINES
 
 #include <SFML/Graphics.hpp>

@@ -1,3 +1,10 @@
+/**
+ * An implementation of the midpoint-displacement algorithm.
+ *
+ *  @author Dennis Kristiansen
+ *  @file midpoint-displacement.cpp
+ */
+
 #define _USE_MATH_DEFINES
 
 #include <SFML/Graphics.hpp>
