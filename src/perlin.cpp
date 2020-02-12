@@ -1,12 +1,11 @@
 #define _USE_MATH_DEFINES
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
-#include <iomanip>
 #include <cmath>
-#include <vector>
-#include <random>
 #include <functional>
+#include <iostream>
+#include <random>
+#include <vector>
 
 // Constants
 // ***********************************************************************
@@ -18,7 +17,7 @@ const unsigned int SG_SIZE = 100;
 // Globals
 // ***********************************************************************
 std::vector<sf::Vector2f> gSeedgrid;
-std::function<float()> rnd;
+std::function<float()>    rnd;
 
 // Helper functions
 // ***********************************************************************
@@ -31,7 +30,7 @@ std::function<float()> rnd;
  * @param t - t decides the degree of interpolation from a to b.
  * @return  - The result of the interpolation.
  */
-template<class T>
+template <class T>
 T lerp(T a, T b, float t) {
 	return (1.0f - t) * a + t * b;
 }
@@ -41,10 +40,8 @@ sf::Vector2f floor(sf::Vector2f a) {
 	return sf::Vector2f(floor(a.x), floor(a.y));
 }
 
-// vector dot pruduct
-float dot(sf::Vector2f a, sf::Vector2f b) {
-	return a.x * b.x + a.y * b.y;
-}
+// vector dot product
+float dot(sf::Vector2f a, sf::Vector2f b) { return a.x * b.x + a.y * b.y; }
 
 /**
  * Fraction. Get the fraction part of a type.
@@ -52,7 +49,7 @@ float dot(sf::Vector2f a, sf::Vector2f b) {
  * @param a - Var to get fraction from
  * @return  - The fraction part of the input
  */
-template<class T>
+template <class T>
 T fract(T a) {
 	return a - floor(a);
 }
@@ -65,7 +62,7 @@ T fract(T a) {
  * @param max - Maximum bound of the range
  * @return    - The clamped value
  */
-template<class T>
+template <class T>
 T clamp(T a, T min, T max) {
 	return (a > max) ? max : (a < min) ? min : a;
 }
@@ -74,9 +71,7 @@ T clamp(T a, T min, T max) {
 // ***********************************************************************
 
 float random(sf::Vector2f st) {
-    return fract(sin(dot(st,
-                         sf::Vector2f(12.9898,78.233)))
-							* 43758.5453123);
+	return fract(sin(dot(st, sf::Vector2f(12.9898, 78.233))) * 43758.5453123);
 }
 
 float perlin(sf::Vector2f p, float tilesize) {
@@ -99,7 +94,7 @@ float perlin(sf::Vector2f p, float tilesize) {
 	// Bilinear interpolation
 	auto d1 = lerp(c1, c2, u);
 	auto d2 = lerp(c3, c4, u);
-	auto e = lerp(d1, d2, v);
+	auto e  = lerp(d1, d2, v);
 
 	return e;
 }
@@ -107,13 +102,11 @@ float perlin(sf::Vector2f p, float tilesize) {
 // Perlin impl based on provided material
 // ***********************************************************************
 
-sf::Vector2f random2(sf::Vector2f p) {
-	return gSeedgrid[p.x * SG_SIZE + p.y];
-}
+sf::Vector2f random2(sf::Vector2f p) { return gSeedgrid[p.x * SG_SIZE + p.y]; }
 
 float perlin2(sf::Vector2f p, float tilesize) {
 	p = p / tilesize;
-	
+
 	// Coord in the vertex grid
 	auto ip = floor(p);
 
@@ -136,14 +129,14 @@ float perlin2(sf::Vector2f p, float tilesize) {
 	auto c3 = dot(w3, v3);
 	auto c4 = dot(w4, v4);
 
-	// Smootstep interpolation
+	// Smoothstep interpolation
 	auto u = gp.x * gp.x * (3.0f - 2.0f * gp.x);
 	auto v = gp.y * gp.y * (3.0f - 2.0f * gp.y);
 
 	// Bilinear interpolation
 	auto d1 = lerp(c1, c2, u);
 	auto d2 = lerp(c3, c4, u);
-	auto e = lerp(d1, d2, v);
+	auto e  = lerp(d1, d2, v);
 
 	e = (e + sqrt(2.0f) / 2.0f / sqrt(2.0f));
 
@@ -156,9 +149,8 @@ float perlin2(sf::Vector2f p, float tilesize) {
 
 // Assignment noise
 float perlin3(sf::Vector2f p) {
-	return (perlin2(p, 256)
-		  + 0.5f  * perlin2(p, 128)
-		  + 0.25f * perlin2(p, 64)) / 1.75f;
+	return (perlin2(p, 256) + 0.5f * perlin2(p, 128) + 0.25f * perlin2(p, 64)) /
+	       1.75f;
 }
 
 /* float perlin3(sf::Vector2f p, float t) { */
@@ -180,18 +172,19 @@ int main() {
 
 	// Generate seed
 	std::string seed_str;
-	std::cout << "Seed string: "; getline(std::cin, seed_str);
+	std::cout << "Seed string: ";
+	getline(std::cin, seed_str);
 	std::seed_seq seed(seed_str.begin(), seed_str.end());
 
 	// Initialize generator and distribution
-	std::default_random_engine generator(seed);
+	std::default_random_engine            generator(seed);
 	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
 	rnd = std::bind(distribution, generator);
 
 	// Setup seedgrid
 	gSeedgrid.resize(SG_SIZE * SG_SIZE);
 	for (size_t i = 0; i < SG_SIZE * SG_SIZE; i++) {
-		auto r = (rnd() + 1.0f) * M_PI;
+		auto r       = (rnd() + 1.0f) * M_PI;
 		gSeedgrid[i] = sf::Vector2f(cos(r), sin(r));
 	}
 
@@ -199,15 +192,12 @@ int main() {
 	// *******************************************************************
 
 	// Create window
-	sf::RenderWindow window(
-			sf::VideoMode(windowx, windowy),
-			"Perlin noise"
-		);
+	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "Perlin noise");
 	window.setFramerateLimit(30);
 
 	// Screenshot
-	sf::Image capture;
-	sf::Texture capture_texture;
+	sf::Image    capture;
+	sf::Texture  capture_texture;
 	sf::Vector2u windowSize = window.getSize();
 
 	sf::Texture texture;
@@ -225,32 +215,36 @@ int main() {
 
 	// Create table of pixels
 	// times 4 because pixels = (red, green, blue, alpha)
-	uint8_t* pixels = new uint8_t[windowx * windowy * 4];
+	auto *pixels = new uint8_t[windowx * windowy * 4];
 
 	// Generate an image from noise
 	// *******************************************************************
 	for (size_t x = 0; x < windowx; x++) {
 		for (size_t y = 0; y < windowy; y++) {
-			auto c = dumb.getPixel(x, y);
-			uint8_t e = perlin3(sf::Vector2f(x, y)) * 255;
-			pixels[4*(x+y*windowx)  ] = clamp(c.r + e, 0, 255);
-			pixels[4*(x+y*windowx)+1] = clamp(c.g + e, 0, 255);
-			pixels[4*(x+y*windowx)+2] = clamp(c.b + e, 0, 255);
-			pixels[4*(x+y*windowx)+3] = 255; // Should always be 255!!!
+			auto    c                     = dumb.getPixel(x, y);
+			uint8_t e                     = perlin3(sf::Vector2f(x, y)) * 255;
+			pixels[4 * (x + y * windowx)] = clamp(c.r + e, 0, 255);
+			pixels[4 * (x + y * windowx) + 1] = clamp(c.g + e, 0, 255);
+			pixels[4 * (x + y * windowx) + 2] = clamp(c.b + e, 0, 255);
+			pixels[4 * (x + y * windowx) + 3] = 255; // Should always be 255!!!
 		}
 	}
 
 	texture.update(pixels);
 
-	auto center = sf::Vector2f(windowx / 2, windowy / 2);
-	auto resolution = 260.0f;
-	auto intensity = 30;
-	auto radius = 550.0f;
-	size_t c = 0;
-	auto circle = sf::VertexArray(sf::PrimitiveType::LineStrip, (size_t)resolution + 1);
+	auto   center     = sf::Vector2f(windowx / 2, windowy / 2);
+	auto   resolution = 260.0f;
+	auto   intensity  = 30;
+	auto   radius     = 550.0f;
+	size_t c          = 0;
+	auto   circle =
+	    sf::VertexArray(sf::PrimitiveType::LineStrip, (size_t)resolution + 1);
 
 	for (float i = 0; i <= 2.0 * M_PI; i += 2.0 * M_PI / resolution) {
-		auto val = perlin2(sf::Vector2f(cos(i) * intensity, sin(i) * intensity) + sf::Vector2f(500, 500), 8);
+		auto val =
+		    perlin2(sf::Vector2f(cos(i) * intensity, sin(i) * intensity) +
+		                sf::Vector2f(500, 500),
+		            8);
 
 		auto x = cos(i) * radius * val;
 		auto y = sin(i) * radius * val;
@@ -259,14 +253,11 @@ int main() {
 	}
 
 	// Assign the last point to the position of the first
-	circle[c++].position = circle[0].position;
+	circle[c].position = circle[0].position;
 
 	// Create a sprite and assign texture
 	sf::Sprite sprite;
 	sprite.setTexture(texture);
-
-	sf::Clock clock;
-	clock.restart();
 
 	// Game loop
 	// *******************************************************************
@@ -275,9 +266,7 @@ int main() {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			switch (event.type) {
-				case sf::Event::Closed: 
-					window.close();
-					break;
+				case sf::Event::Closed: window.close(); break;
 
 				case sf::Event::KeyPressed:
 					capture_texture.create(windowSize.x, windowSize.y);
@@ -286,12 +275,9 @@ int main() {
 					capture.saveToFile("output.png");
 					break;
 
-				default:
-					break;
+				default: break;
 			}
 		}
-
-		float dt = clock.restart().asSeconds();
 
 		// Rendering
 		window.clear();

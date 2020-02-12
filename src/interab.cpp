@@ -2,16 +2,16 @@
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
-#include <iostream>
 #include <functional>
+#include <iostream>
 
 const uint32_t windowx = 1200;
 const uint32_t windowy = 800;
-const uint32_t r = 50;
+const uint32_t r       = 50;
 
 uint8_t u8lerp(uint8_t a, uint8_t b, float t) {
 	// t: [0, 1] |--> [0, 255]
-	uint8_t t_u8 = static_cast<uint8_t>(t * 255);
+	auto t_u8 = static_cast<uint8_t>(t * 255);
 
 	return ((255 - t_u8) * a + t_u8 * b) / 255;
 }
@@ -29,7 +29,7 @@ sf::Vector2f lerp(sf::Vector2f a, sf::Vector2f b, float t) {
 }
 
 /**
- * Quadratic Bazier Curve.
+ * Quadratic Bezier Curve.
  *
  * Interpolate between two points (p_0 and p_2) using
  * a control point (p_1).
@@ -40,35 +40,25 @@ sf::Vector2f lerp(sf::Vector2f a, sf::Vector2f b, float t) {
  * @param t   - degree of interpolation along the curve.
  * @return    - The result of the interpolation.
  */
-sf::Vector2f quadratic_bezier_curve(
-		sf::Vector2f p_0,
-		sf::Vector2f p_1,
-		sf::Vector2f p_2,
-		float t
-	) {
-	return (1.0f - t) * (1.0f - t) * p_0
-			+ 2.0f * t * (1.0f - t) * p_1
-			+ t * t * p_2;
+sf::Vector2f quadratic_bezier_curve(sf::Vector2f p_0, sf::Vector2f p_1,
+                                    sf::Vector2f p_2, float t) {
+	return (1.0f - t) * (1.0f - t) * p_0 + 2.0f * t * (1.0f - t) * p_1 +
+	       t * t * p_2;
 }
 
 /**
- * Cubic Bazier Curve.
+ * Cubic Bezier Curve.
  *
  * @param p_n - The n-th control point.
  * @param t   - Degree of interpolation along curve.
  * @return    - The result of the interpolation.
  */
-sf::Vector2f cubic_bezier_curve(
-		sf::Vector2f p_0,
-		sf::Vector2f p_1,
-		sf::Vector2f p_2,
-		sf::Vector2f p_3,
-		float t
-	) {
-	return static_cast<float>(pow((1.0f - t), 3)) * p_0
-			+ 3.0f * t * static_cast<float>(pow((1.0f - t), 2)) * p_1
-			+ 3.0f * static_cast<float>(pow(t, 2)) * (1.0f - t) * p_2
-			+ static_cast<float>(pow(t, 3)) * p_3;
+sf::Vector2f cubic_bezier_curve(sf::Vector2f p_0, sf::Vector2f p_1,
+                                sf::Vector2f p_2, sf::Vector2f p_3, float t) {
+	return static_cast<float>(pow((1.0f - t), 3)) * p_0 +
+	       3.0f * t * static_cast<float>(pow((1.0f - t), 2)) * p_1 +
+	       3.0f * static_cast<float>(pow(t, 2)) * (1.0f - t) * p_2 +
+	       static_cast<float>(pow(t, 3)) * p_3;
 }
 
 /**
@@ -83,22 +73,16 @@ sf::Vector2f cubic_bezier_curve(
  *				that takes t as a parameter and returns a new t.
  * @return    - The result of the interpolation.
  */
-sf::Vector2f smoothstep(
-		sf::Vector2f p_0,
-		sf::Vector2f p_1,
-		float t,
-		std::function<float(float)> s
-	) {
+sf::Vector2f smoothstep(sf::Vector2f p_0, sf::Vector2f p_1, float t,
+                        std::function<float(float)> s) {
 	return (1.0f - s(t)) * p_0 + s(t) * p_1;
 }
 
 int main() {
 	// Initialization
 	// *******************************************************************
-	sf::RenderWindow window(
-			sf::VideoMode(windowx, windowy),
-			"Interpolation Assignment - Part A and B"
-		);
+	sf::RenderWindow window(sf::VideoMode(windowx, windowy),
+	                        "Interpolation Assignment - Part A and B");
 	window.setFramerateLimit(30);
 
 	sf::CircleShape obj_1, obj_2, obj_3, obj_4, disk;
@@ -150,15 +134,12 @@ int main() {
 		}
 
 		if (t_1 <= 3.0f) {
-			obj_1.setPosition(lerp(
-						sf::Vector2f(r, r),
-						sf::Vector2f(windowx - r, windowy - r),
-						t_1 / 3.0f));
+			obj_1.setPosition(lerp(sf::Vector2f(r, r),
+			                       sf::Vector2f(windowx - r, windowy - r),
+			                       t_1 / 3.0f));
 		} else {
-			obj_1.setPosition(lerp(
-						sf::Vector2f(windowx - r, windowy - r),
-						sf::Vector2f(r, r),
-						(t_1 - 3.0f) / 3.0f));
+			obj_1.setPosition(lerp(sf::Vector2f(windowx - r, windowy - r),
+			                       sf::Vector2f(r, r), (t_1 - 3.0f) / 3.0f));
 		}
 
 		// Interpolate object 2
@@ -171,16 +152,13 @@ int main() {
 
 		if (t_2 <= 5.0f) {
 			obj_2.setPosition(quadratic_bezier_curve(
-						sf::Vector2f(r, r),
-						sf::Vector2f(windowx, 0.0f),
-						sf::Vector2f(windowx - r, windowy - r),
-						t_2 / 5.0f));
+			    sf::Vector2f(r, r), sf::Vector2f(windowx, 0.0f),
+			    sf::Vector2f(windowx - r, windowy - r), t_2 / 5.0f));
 		} else {
 			obj_2.setPosition(quadratic_bezier_curve(
-						sf::Vector2f(windowx - r, windowy - r),
-						sf::Vector2f(windowx, 0.0f),
-						sf::Vector2f(r, r),
-						(t_2 - 5.0f) / 5.0f));
+			    sf::Vector2f(windowx - r, windowy - r),
+			    sf::Vector2f(windowx, 0.0f), sf::Vector2f(r, r),
+			    (t_2 - 5.0f) / 5.0f));
 		}
 
 		// Interpolate object 3
@@ -191,22 +169,16 @@ int main() {
 			t_3 = 0.0f;
 		}
 
-		auto order_3_curve = [](float t){
-			return t * t * (3.0f - 2.0f * t);
-		};
+		auto order_3_curve = [](float t) { return t * t * (3.0f - 2.0f * t); };
 
 		if (t_3 <= 6.0f) {
-			obj_3.setPosition(smoothstep(
-						sf::Vector2f(windowx / 2, r),
-						sf::Vector2f(windowx / 2, windowy - r),
-						t_3 / 6.0f,
-						order_3_curve));
+			obj_3.setPosition(smoothstep(sf::Vector2f(windowx / 2, r),
+			                             sf::Vector2f(windowx / 2, windowy - r),
+			                             t_3 / 6.0f, order_3_curve));
 		} else {
-			obj_3.setPosition(smoothstep(
-						sf::Vector2f(windowx / 2, windowy - r),
-						sf::Vector2f(windowx / 2, r),
-						(t_3 - 6.0f) / 6.0f,
-						order_3_curve));
+			obj_3.setPosition(smoothstep(sf::Vector2f(windowx / 2, windowy - r),
+			                             sf::Vector2f(windowx / 2, r),
+			                             (t_3 - 6.0f) / 6.0f, order_3_curve));
 		}
 
 		// Interpolate object 4
@@ -215,39 +187,35 @@ int main() {
 		if (t_3 <= 6.0f) {
 			auto u = pow(cos(M_PI / 2.0 * (t_3) / 6.0f), 2);
 			obj_4.setPosition(cubic_bezier_curve(
-						sf::Vector2f(r, windowy / 2),
-						sf::Vector2f(windowx / 3, 0),
-						sf::Vector2f(2 * windowx / 3, windowy),
-						sf::Vector2f(windowx - r, windowy / 2),
-						u));
+			    sf::Vector2f(r, windowy / 2), sf::Vector2f(windowx / 3, 0),
+			    sf::Vector2f(2 * windowx / 3, windowy),
+			    sf::Vector2f(windowx - r, windowy / 2), u));
 		} else {
 			auto u = pow(cos(M_PI / 2.0 * (t_3 - 6.0f) / 6.0f), 2);
 			obj_4.setPosition(cubic_bezier_curve(
-						sf::Vector2f(windowx - r, windowy / 2),
-						sf::Vector2f(2 * windowx / 3, windowy),
-						sf::Vector2f(windowx / 3, 0),
-						sf::Vector2f(r, windowy / 2),
-						u));
+			    sf::Vector2f(windowx - r, windowy / 2),
+			    sf::Vector2f(2 * windowx / 3, windowy),
+			    sf::Vector2f(windowx / 3, 0), sf::Vector2f(r, windowy / 2), u));
 		}
 
 		// Interpolate rgb values
 		// ***************************************************************
 
 		if (t_2 <= 2.5f) {
-			disk.setFillColor(sf::Color(
-						u8lerp(0, 255, t_2 / 2.5f), 0.0f, 0.0f));
+			disk.setFillColor(
+			    sf::Color(u8lerp(0, 255, t_2 / 2.5f), 0.0f, 0.0f));
 		} else if (t_2 <= 5.0f) {
-			disk.setFillColor(sf::Color(
-						u8lerp(255, 0, (t_2 - 2.5f) / 2.5f), 0.0f, 0.0f));
+			disk.setFillColor(
+			    sf::Color(u8lerp(255, 0, (t_2 - 2.5f) / 2.5f), 0.0f, 0.0f));
 		} else if (t_2 <= 7.5f) {
-			disk.setFillColor(sf::Color(
-						0.0f, u8lerp(0, 255, (t_2 - 5.0f) / 2.5f), 0.0f));
+			disk.setFillColor(
+			    sf::Color(0.0f, u8lerp(0, 255, (t_2 - 5.0f) / 2.5f), 0.0f));
 		} else {
-			disk.setFillColor(sf::Color(
-						0.0f, u8lerp(255, 0, (t_2 - 7.5f) / 2.5f), 0.0f));
+			disk.setFillColor(
+			    sf::Color(0.0f, u8lerp(255, 0, (t_2 - 7.5f) / 2.5f), 0.0f));
 		}
 
-        // Drawing
+		// Drawing
 		// ***************************************************************
 		window.clear();
 
@@ -262,4 +230,3 @@ int main() {
 
 	return EXIT_SUCCESS;
 }
-

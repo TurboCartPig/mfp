@@ -6,13 +6,13 @@
 
 // Constants
 // ***********************************************************************
-const float r = 160.0f;				// Radius of the circle
-const unsigned int num = 100;       // Number of triangles
+const float        r       = 160.0f; // Radius of the circle
+const unsigned int num     = 100;    // Number of triangles
 const unsigned int windowx = 1200;
 const unsigned int windowy = 800;
-const sf::Vector2f center(
-		windowx / 2.0f, windowy / 2.0f  // Coord of the center point
-	);
+const sf::Vector2f center(windowx / 2.0f,
+                          windowy / 2.0f // Coord of the center point
+);
 
 // Forward declarations
 // ***********************************************************************
@@ -43,7 +43,7 @@ sf::Vector2f lerp(sf::Vector2f a, sf::Vector2f b, float t) {
  */
 sf::Vector2f square(float i) {
 	sf::Vector2f ret;
-	auto angle = 2.0f * M_PI * i / num;
+	auto         angle = 2.0f * M_PI * i / num;
 
 	if (angle <= M_PI / 4.0) {
 		ret.x = r;
@@ -72,7 +72,7 @@ sf::Vector2f square(float i) {
 	}
 
 	/* std::cout << "Angle: " << angle << std::endl; */
-    /* std::cout << "Coord: " << ret.x << ", " << ret.y << std::endl; */
+	/* std::cout << "Coord: " << ret.x << ", " << ret.y << std::endl; */
 
 	return ret + center;
 }
@@ -84,17 +84,14 @@ sf::Vector2f square(float i) {
  * @return  - Point on the circle.
  */
 sf::Vector2f circle(float i) {
-	return sf::Vector2f(
-			r * cos(2.0 * M_PI * i / num),
-			r * sin(2.0 * M_PI * i / num)
-		) + center;
+	return sf::Vector2f(r * cos(2.0 * M_PI * i / num),
+	                    r * sin(2.0 * M_PI * i / num)) +
+	       center;
 }
 
 int main() {
-	sf::RenderWindow window(
-			sf::VideoMode(windowx, windowy),
-			"Interpolation Assignment"
-		);
+	sf::RenderWindow window(sf::VideoMode(windowx, windowy),
+	                        "Interpolation Assignment");
 	window.setFramerateLimit(30);
 
 	// Triangle
@@ -113,8 +110,8 @@ int main() {
 	shape.setFillColor(sf::Color::Red);
 	shape.setPointCount(3 * num);
 
-	auto t = 0.0f;   // Time, used for interpolation
-	auto inc = 1;    // Are we incrementing or decrementing the t variable
+	auto      t   = 0.0f; // Time, used for interpolation
+	auto      inc = 1;    // Are we incrementing or decrementing the t variable
 	sf::Clock clock;
 	clock.restart();
 
@@ -139,14 +136,8 @@ int main() {
 		// Interpolation and triangle generation
 		for (std::size_t i = 0, c = 0; i < num; i++) {
 			shape.setPoint(c++, center);
-			shape.setPoint(
-					c++,
-					lerp(square(i    ), circle(i    ), t / 1.0)
-				);
-			shape.setPoint(
-					c++,
-					lerp(square(i + 1), circle(i + 1), t / 1.0)
-				);
+			shape.setPoint(c++, lerp(square(i), circle(i), t / 1.0));
+			shape.setPoint(c++, lerp(square(i + 1), circle(i + 1), t / 1.0));
 		}
 
 		// Rendering
