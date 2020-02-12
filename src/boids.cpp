@@ -1,6 +1,6 @@
 /**
- * A boids implementation based on "Boids",
- * (http://www.red3d.com/cwr/boids/) by Reynolds,
+ * A boids implementation based on [Boids]
+ * (http://www.red3d.com/cwr/boids/) by Craig Reynolds,
  * and the course material.
  *
  * @author Dennis Kristiansen
@@ -186,8 +186,8 @@ sf::Vector2f Boid::getVelocity() const { return vel; }
  * @param dir Desired direction.
  * @return    Direction to steer scaled to maxforce.
  *
- * @see "Steering Behaviors For Autonomous Characters",
- * http://www.red3d.com/cwr/steer/gdc99/
+ * @see [Steering Behaviors For Autonomous Characters]
+ * (http://www.red3d.com/cwr/steer/gdc99/)
  */
 sf::Vector2f Boid::steer(const sf::Vector2f dir, float steerforce) {
 	auto ret = maxspeed * dir / length(dir) - vel;
