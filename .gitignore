@@ -54,11 +54,16 @@ _deps
 
 # End of https://www.gitignore.io/api/c++,cmake
 
-# Repo specific stuff
+### My Custom stuff ###
 
 *.pdf
+
 .vscode/
 .idea/
+
+html/
+latex/
+
 build/
 cmake-build-debug/
 cmake-build-release/
