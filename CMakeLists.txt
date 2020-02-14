@@ -39,3 +39,6 @@ target_link_libraries(boids sfml-graphics)
 
 add_executable(tetris src/tetris_live.cpp)
 target_link_libraries(tetris sfml-graphics)
+
+add_executable(fountain src/fountain.cpp)
+target_link_libraries(fountain sfml-graphics)
