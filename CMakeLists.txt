@@ -36,3 +36,6 @@ target_link_libraries(perlin sfml-graphics)
 
 add_executable(boids src/boids.cpp)
 target_link_libraries(boids sfml-graphics)
+
+add_executable(tetris src/tetris_live.cpp)
+target_link_libraries(tetris sfml-graphics)
