@@ -18,6 +18,8 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang | GNU")
 endif()
 
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL)
+find_package(GLEW)
 
 add_executable(solar src/solar.cpp)
 target_link_libraries(solar sfml-graphics)
@@ -42,3 +44,6 @@ target_link_libraries(tetris sfml-graphics)
 
 add_executable(fountain src/fountain.cpp)
 target_link_libraries(fountain sfml-graphics)
+
+add_executable(fountain-gpu src/fountain-gpu.cpp)
+target_link_libraries(fountain-gpu sfml-window OpenGL::OpenGL GLEW::GLEW)
