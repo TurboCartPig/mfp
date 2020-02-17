@@ -19,7 +19,7 @@ endif()
 
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-find_package(GLEW)
+find_package(GLEW 2.1)
 
 add_executable(solar src/solar.cpp)
 target_link_libraries(solar sfml-graphics)
