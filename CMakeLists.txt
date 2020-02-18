@@ -46,4 +46,4 @@ add_executable(fountain src/fountain.cpp)
 target_link_libraries(fountain sfml-graphics)
 
 add_executable(fountain-gpu src/fountain-gpu.cpp)
-target_link_libraries(fountain-gpu sfml-window OpenGL::OpenGL GLEW::GLEW)
+target_link_libraries(fountain-gpu sfml-window OpenGL::GL GLEW::GLEW)

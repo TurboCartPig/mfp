@@ -13,6 +13,8 @@
  * @file fountain.cpp
  */
 
+#define _USE_MATH_DEFINES
+
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <functional>

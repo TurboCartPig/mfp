@@ -5,6 +5,8 @@
  * @file fountain-gpu.cpp
  */
 
+#define _USE_MATH_DEFINES
+
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
 #include <fstream>
@@ -39,7 +41,7 @@ class ShaderProgram {
 
 ShaderProgram::ShaderProgram(std::vector<std::string> paths) {
 	// Load all shaders from disk and compile them
-	GLuint shaders[paths.size()];
+	std::vector<GLuint> shaders(paths.size());
 	for (size_t i = 0; i < paths.size(); i++) {
 		auto path = paths[i];
 
@@ -182,12 +184,12 @@ ParticleEmitter::ParticleEmitter(const GLuint program) {
 	shaderProgram = program;
 }
 
-ParticleEmitter::~ParticleEmitter(){
-    for (auto pg : particleGroups) {
-        glDeleteBuffers(1, &pg->vbo);
-        glDeleteBuffers(1, &pg->vao);
-        delete pg;
-    }
+ParticleEmitter::~ParticleEmitter() {
+	for (auto pg : particleGroups) {
+		glDeleteBuffers(1, &pg->vbo);
+		glDeleteBuffers(1, &pg->vao);
+		delete pg;
+	}
 }
 
 /**
@@ -234,7 +236,7 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
                            float velDiviation) {
 	std::cout << "Emitting particles!\n";
 
-	Particle ps[count];
+	std::vector<Particle> ps(count);
 	for (size_t i = 0; i < count; i++) {
 		auto velDiv = M_PI * velDiviation / 180.0f;
 		auto angle  = rnd() * velDiv + M_PI / 2.0f;
@@ -256,17 +258,17 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 	glBindBuffer(GL_ARRAY_BUFFER, pg->vbo);
 
 	// Upload data
-	glBufferData(GL_ARRAY_BUFFER, count, ps, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, count, ps.data(), GL_STATIC_DRAW);
 
 	// Specify format of the data
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
 	                      nullptr); // Pos
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
 	                      (GLvoid *)(2 * sizeof(float))); // Vel
 
-    // Unbind buffers
+	// Unbind buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
