@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(MFP LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -47,3 +47,6 @@ target_link_libraries(fountain sfml-graphics)
 
 add_executable(fountain-gpu src/fountain-gpu.cpp)
 target_link_libraries(fountain-gpu sfml-window OpenGL::GL GLEW::GLEW)
+
+add_executable(quat src/quat.cpp)
+target_link_libraries(quat sfml-graphics)
