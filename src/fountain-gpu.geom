@@ -23,7 +23,7 @@ void main() {
     vec4 center = vec4(particle[0].pos, 0.0, 1.0);
 
     // Emit four vertices to make a billboard
-    vec2 uv = vec2(-1.0, -1.0) * 0.01;
+    vec2 uv = vec2(-1.0, -1.0) * 0.001;
     vec4 p = center;
     p.xy += uv;
     frag.uv = uv;
@@ -31,7 +31,7 @@ void main() {
     gl_Position = p;
     EmitVertex();
 
-    uv = vec2(1.0, -1.0) * 0.01;
+    uv = vec2(1.0, -1.0) * 0.001;
     p = center;
     p.xy += uv;
     frag.uv = uv;
@@ -39,7 +39,7 @@ void main() {
     frag.alpha = alpha;
     EmitVertex();
 
-    uv = vec2(-1.0, 1.0) * 0.01;
+    uv = vec2(-1.0, 1.0) * 0.001;
     p = center;
     p.xy += uv;
     frag.uv = uv;
@@ -47,7 +47,7 @@ void main() {
     frag.alpha = alpha;
     EmitVertex();
 
-    uv = vec2(1.0, 1.0) * 0.01;
+    uv = vec2(1.0, 1.0) * 0.001;
     p = center;
     p.xy += uv;
     frag.uv = uv;
@@ -56,5 +56,4 @@ void main() {
     EmitVertex();
 
     EndPrimitive();
-
 }
