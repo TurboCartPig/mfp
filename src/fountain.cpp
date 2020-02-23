@@ -24,9 +24,13 @@
 
 // Constants
 // ***********************************************************************
-static const uint32_t windowx       = 1000;
-static const uint32_t windowy       = 1000;
-static const size_t   MAX_OBJ_COUNT = 1000;
+static const uint32_t windowx                      = 1000;
+static const uint32_t windowy                      = 1000;
+static const size_t   MAX_OBJ_COUNT                = 100000;
+static const float    PARTICLE_RADIUS              = 1.0f;
+static const float    PARTICLE_EXPLOSION_TIME      = 1.0f;
+static const size_t   PARTICLE_SPAWN_RATE          = 50;
+static const size_t   PARTICLE_EXPLOSION_PARTICLES = 10;
 
 // Globals
 // ***********************************************************************
@@ -42,23 +46,32 @@ std::function<float()>             rnd;
  *
  * TODO: In order to turn this into a GPU particle, I need to:
  * 1. Make it immutable via using parametric integration
- * 2. Implement a separate particle emitter that can handle spawning and storing the particles
+ * 2. Implement a separate particle emitter that can handle spawning and storing
+ * the particles
  * 3. Upload the particles to a buffer
- * 4. Use vertex shader to simulate physics and find current position of particle
- * 5. Use geometry shader to project particle to screen and generate a screen aligned billboard
+ * 4. Use vertex shader to simulate physics and find current position of
+ * particle
+ * 5. Use geometry shader to project particle to screen and generate a screen
+ * aligned billboard
  * 6. Use fragment shader to draw the particle
  *
  * @see https://www.genericgamedev.com/effects/parametric-particles/
- * @see https://www.genericgamedev.com/effects/parametric-gpu-accelerated-particles/
+ * @see
+ * https://www.genericgamedev.com/effects/parametric-gpu-accelerated-particles/
  */
 class PhysicsObject {
   public:
 	PhysicsObject();
+	PhysicsObject(sf::Vector2f p, sf::Vector2f v);
 	void         applyForce(sf::Vector2f force);
 	void         update(float dt);
 	void         draw(sf::RenderWindow &w);
+	void         deactivate() { active = false; }
 	bool         isActive() const { return active; }
+	bool         shouldExplode() const { return explode; }
+	sf::Vector2f getPosition() const { return pos; }
 	sf::Vector2f getVelocity() const { return vel; }
+	float        getLifetime() const { return lifetime; }
 
   private:
 	sf::Vector2f    pos;
@@ -68,6 +81,7 @@ class PhysicsObject {
 	float           lifetime;
 	float           maxLifetime;
 	bool            active;
+	bool            explode;
 	sf::CircleShape shape;
 };
 
@@ -136,7 +150,7 @@ sf::Vector2f project(const sf::Vector2f a, const sf::Vector2f b) {
 
 PhysicsObject::PhysicsObject() {
 	auto angle = map_range(rnd(), -1.0f, 1.0f, -135.0f, -45.0f);
-	auto speed = 300.0f;
+	auto speed = map_range(rnd(), -1.0f, 1.0f, 100.0f, 500.0f);
 
 	// Can I give the object an impulse instead of setting the velocity
 	pos = sf::Vector2f(windowx / 2, windowy);
@@ -147,12 +161,20 @@ PhysicsObject::PhysicsObject() {
 
 	lifetime    = 0.0f;
 	maxLifetime = map_range(rnd(), -1.0f, 1.0f, 3.0f, 10.0f);
-	// maxLifetime = 10.0f;
 
 	active = true;
 
-	shape = sf::CircleShape(10.0f, 10);
+	auto r  = map_range(rnd(), -1.0f, 1.0f, 0.0f, 100.0f);
+	explode = r < 5.0f;
+
+	shape = sf::CircleShape(PARTICLE_RADIUS, 8);
 	shape.setFillColor(sf::Color(255, 185, 20, 255));
+}
+
+PhysicsObject::PhysicsObject(sf::Vector2f p, sf::Vector2f v) : PhysicsObject() {
+	pos     = p;
+	vel     = v;
+	explode = false;
 }
 
 void PhysicsObject::applyForce(sf::Vector2f force) { acc += force * invMass; }
@@ -212,9 +234,20 @@ int main() {
 	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
 	rnd = std::bind(distribution, generator);
 
+	// Init sfml stuff
+	// *******************************************************************
+
 	// Create window
 	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "The Fountain");
 	window.setFramerateLimit(30);
+
+	// Screenshot
+	sf::Image    capture;
+	sf::Texture  capture_texture;
+	sf::Vector2u windowSize = window.getSize();
+
+	// Init simulation stuff
+	// *******************************************************************
 
 	gPhysicsObjects.reserve(MAX_OBJ_COUNT);
 
@@ -233,6 +266,13 @@ int main() {
 		while (window.pollEvent(event)) {
 			switch (event.type) {
 				case sf::Event::Closed: window.close(); break;
+
+				case sf::Event::KeyPressed:
+					capture_texture.create(windowSize.x, windowSize.y);
+					capture_texture.update(window);
+					capture = capture_texture.copyToImage();
+					capture.saveToFile("output.png");
+					break;
 
 				default: break;
 			}
@@ -253,25 +293,47 @@ int main() {
 		}
 
 		// Spawn new objects
-		for (size_t i = 0; i < 2; i++) {
-			// Emplace_back takes the parameters of
-			// the constructor and constructs the object internally.
-			// This solves a lot of weird issues in C++
-			// gPhysicsObjects.emplace_back();
+		// FIXME:
+		if (gPhysicsObjects.size() < MAX_OBJ_COUNT) {
+			// Spawn new ones
+			for (size_t i = 0; i < PARTICLE_SPAWN_RATE; i++) {
+				// Emplace_back takes the parameters of
+				// the constructor and constructs the object internally.
+				// This solves a lot of weird issues in C++
+				// gPhysicsObjects.emplace_back();
 
-			if (gPhysicsObjects.size() < MAX_OBJ_COUNT)
 				gPhysicsObjects.push_back(new PhysicsObject);
+			}
+
+			// Spawn explosions
+			for (size_t j = 0; j < gPhysicsObjects.size(); j++) {
+				auto o = gPhysicsObjects[j];
+				if (o->getLifetime() > PARTICLE_EXPLOSION_TIME &&
+				    o->shouldExplode()) {
+					std::cout << "Boom!";
+					o->deactivate();
+
+					// Spawn explosion particles
+					for (size_t i = 0; i < PARTICLE_EXPLOSION_PARTICLES; i++) {
+						auto pos = o->getPosition();
+						auto angle =
+						    map_range(rnd(), -1.0f, 1.0f, 0.0f, 360.0f);
+						auto speed = 100.0f;
+						auto vel   = sf::Vector2f(speed * cos(angle),
+                                                speed * sin(angle));
+						gPhysicsObjects.push_back(new PhysicsObject(pos, vel));
+					}
+				}
+			}
 		}
 
 		// Apply forces
 		for (auto o : gPhysicsObjects) {
 			o->applyForce(gravity);
 
-			// FIXME: This is weird
-			// auto mywind = project(o->getVelocity(), wind);
-			// auto mywind = project(wind, o->getVelocity());
-			auto mywind = sf::Vector2f(wind.x - o->getVelocity().x, 0.0f);
-			o->applyForce(mywind);
+			// Apply wind force
+			auto proj_w_V = project(o->getVelocity(), wind);
+			o->applyForce(wind - proj_w_V);
 		}
 
 		// Update all physics objects
