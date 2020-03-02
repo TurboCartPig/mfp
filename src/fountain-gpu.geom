@@ -1,5 +1,7 @@
 #version 450
 
+const float PARTICLE_SIZE = 0.001;
+
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
@@ -23,7 +25,7 @@ void main() {
     vec4 center = vec4(particle[0].pos, 0.0, 1.0);
 
     // Emit four vertices to make a billboard
-    vec2 uv = vec2(-1.0, -1.0) * 0.001;
+    vec2 uv = vec2(-1.0, -1.0) * PARTICLE_SIZE;
     vec4 p = center;
     p.xy += uv;
     frag.uv = uv;
@@ -31,7 +33,7 @@ void main() {
     gl_Position = p;
     EmitVertex();
 
-    uv = vec2(1.0, -1.0) * 0.001;
+    uv = vec2(1.0, -1.0) * PARTICLE_SIZE;
     p = center;
     p.xy += uv;
     frag.uv = uv;
@@ -39,7 +41,7 @@ void main() {
     frag.alpha = alpha;
     EmitVertex();
 
-    uv = vec2(-1.0, 1.0) * 0.001;
+    uv = vec2(-1.0, 1.0) * PARTICLE_SIZE;
     p = center;
     p.xy += uv;
     frag.uv = uv;
@@ -47,7 +49,7 @@ void main() {
     frag.alpha = alpha;
     EmitVertex();
 
-    uv = vec2(1.0, 1.0) * 0.001;
+    uv = vec2(1.0, 1.0) * PARTICLE_SIZE;
     p = center;
     p.xy += uv;
     frag.uv = uv;

@@ -8,12 +8,7 @@
  * particles be effected by them.
  *
  * TODO: Write a system based on transform feedback
- * 1. Generate 1 or more particles into a vertex buffer.
- * 2. Render that vertex buffer into a transform feedback buffer.
- * 3. Render the first TFB to both the screen and a second TFB.
- * 4. Render the second TFB to both the screen and the first TFB...
- *
- * We can add particles via the geometry shader, each time we render a TFB.
+ * @see [Particle System using Transform Feedback](http://ogldev.atspace.co.uk/www/tutorial28/tutorial28.html)
  *
  * @author Dennis Kristiansen
  * @file fountain-gpu.cpp
