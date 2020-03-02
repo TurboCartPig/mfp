@@ -14,6 +14,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang | GNU")
 	add_compile_options(-mtune=generic -march=x86_64 -mavx2)
 	if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang")
 		add_compile_options(-Wweak-vtables -Wexit-time-destructors -Wglobal-constructors -Wmissing-noreturn)
+		add_compile_options(-fsanitize=undefined,address)
 	endif()
 endif()
 
