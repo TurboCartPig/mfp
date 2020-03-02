@@ -50,3 +50,6 @@ target_link_libraries(fountain-gpu sfml-window OpenGL::GL GLEW::GLEW)
 
 add_executable(quat src/quat.cpp)
 target_link_libraries(quat sfml-graphics)
+
+add_executable(billiard src/billiard.cpp)
+target_link_libraries(billiard sfml-graphics)
