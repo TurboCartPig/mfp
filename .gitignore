@@ -63,6 +63,7 @@ _deps
 
 html/
 latex/
+exportToHTML
 
 build/
 cmake-build-debug/
