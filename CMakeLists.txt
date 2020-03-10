@@ -21,6 +21,7 @@ endif()
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 find_package(GLEW 2.1)
+find_package(Eigen3 3.3 REQUIRED CONFIG)
 
 add_executable(solar src/solar.cpp)
 target_link_libraries(solar sfml-graphics)
@@ -54,3 +55,6 @@ target_link_libraries(quat sfml-graphics)
 
 add_executable(billiard src/billiard.cpp)
 target_link_libraries(billiard sfml-graphics)
+
+add_executable(snakesandladders src/snakesandladders.cpp)
+target_link_libraries(snakesandladders Eigen3::Eigen)
