@@ -37,7 +37,7 @@ print(mylist[2:-2:2])
 
 #
 # Loops
-# 
+#
 
 # for loop
 for x in mylist:
@@ -88,7 +88,7 @@ print(mylist2)
 mylist3 = [x * y for x in mylist for y in mylist2]
 print(mylist3)
 
-# 
+#
 # Lists of lists
 #
 mylist = [[1, 2, 3], 4, "test", [5, 6, 7]]
@@ -149,7 +149,7 @@ print(mylens)
 
 #
 # Card example
-# 
+#
 deck = list(range(52))
 print(deck)
 
@@ -181,8 +181,11 @@ print(len(comb))
 
 # Least one ace
 def num_ace(hand):
-    # a = [x for x in hand if x == 1 or x == 14 or x == 27 or x == 40] # ace = 1, 14, 27, 40
-    a = [x for x in hand if value(x-1) == 0]                           # ace = 0,1,2,3
+    # ace = 1, 14, 27, 40
+    # a = [x for x in hand if x == 1 or x == 14 or x == 27 or x == 40]
+    
+    # ace = 0,1,2,3
+    a = [x for x in hand if value(x-1) == 0]
     return len(a)
 
 
