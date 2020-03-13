@@ -8,7 +8,8 @@
  * particles be effected by them.
  *
  * TODO: Write a system based on transform feedback
- * @see [Particle System using Transform Feedback](http://ogldev.atspace.co.uk/www/tutorial28/tutorial28.html)
+ * @see [Particle System using Transform
+ * Feedback](http://ogldev.atspace.co.uk/www/tutorial28/tutorial28.html)
  *
  * @author Dennis Kristiansen
  * @file fountain-gpu.cpp
@@ -18,6 +19,7 @@
 
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
+#include <algorithm>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -66,10 +68,9 @@ class ShaderProgram {
  */
 ShaderProgram::ShaderProgram(std::vector<std::string> &paths) {
 	// Load all shaders from disk and compile them
-	std::vector<GLuint> shaders(paths.size());
-	for (size_t i = 0; i < paths.size(); i++) {
-		auto path = paths[i];
-
+	std::vector<GLuint> shaders;
+	shaders.reserve(paths.size());
+	for (const auto &path : paths) {
 		// Open the file for reading
 		std::ifstream file(path, std::ifstream::in);
 		if (file.bad() || !file.is_open()) {
@@ -121,12 +122,12 @@ ShaderProgram::ShaderProgram(std::vector<std::string> &paths) {
 			std::cout << "\tCompilation log:\n" << log << std::endl;
 		}
 
-		shaders[i] = shader;
+		shaders.push_back(shader);
 	}
 
 	// Build and link a shader program
 	program = glCreateProgram();
-	for (auto shader : shaders)
+	for (const auto shader : shaders)
 		glAttachShader(program, shader);
 
 	glLinkProgram(program);
@@ -143,7 +144,7 @@ ShaderProgram::ShaderProgram(std::vector<std::string> &paths) {
 		std::cout << "\tLinking log:\n" << log << std::endl;
 	}
 
-	for (auto shader : shaders)
+	for (const auto shader : shaders)
 		glDeleteShader(shader);
 }
 
@@ -183,6 +184,11 @@ struct ParticleGroup {
 		lifetime  = 0.0f;
 		acc       = a;
 	}
+
+	~ParticleGroup() {
+		glDeleteBuffers(1, &vao);
+		glDeleteBuffers(1, &vbo);
+	}
 };
 
 /**
@@ -191,17 +197,16 @@ struct ParticleGroup {
 class ParticleEmitter {
   public:
 	explicit ParticleEmitter(GLuint program);
-	~ParticleEmitter();
 	void draw(float dt);
 	void emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
-	          sf::Vector2f acc, float velDiviation);
+	          sf::Vector2f acc, float velDeviation);
 
   private:
-	std::vector<ParticleGroup *> particleGroups;
-	sf::Clock                    clock;
-	GLint                        timeLocation;
-	GLint                        accLocation;
-	GLuint                       shaderProgram;
+	std::vector<ParticleGroup> particleGroups;
+	sf::Clock                  clock;
+	GLint                      timeLocation;
+	GLint                      accLocation;
+	GLuint                     shaderProgram;
 };
 
 ParticleEmitter::ParticleEmitter(const GLuint program) {
@@ -214,42 +219,38 @@ ParticleEmitter::ParticleEmitter(const GLuint program) {
 	shaderProgram = program;
 }
 
-ParticleEmitter::~ParticleEmitter() {
-	for (auto pg : particleGroups) {
-		glDeleteBuffers(1, &pg->vbo);
-		glDeleteBuffers(1, &pg->vao);
-		delete pg;
-	}
-}
-
 /**
  * Draw the particles
  */
 void ParticleEmitter::draw(float dt) {
 
 	// Delete dead particle groups
-	for (size_t i = particleGroups.size(); i-- > 0;) {
-		if (particleGroups[i]->lifetime > 2.0f) {
-			std::swap(particleGroups[i], particleGroups.back());
+//	for (size_t i = particleGroups.size(); i-- > 0;) {
+//		if (particleGroups[i].lifetime > 2.0f) {
+//			std::swap(particleGroups[i], particleGroups.back());
+//
+//			// Cleanup the particle group
+//			auto p = particleGroups.back();
+//			glDeleteBuffers(1, &p.vbo);
+//			glDeleteBuffers(1, &p.vao);
+//
+//			particleGroups.pop_back();
+//		}
+//	}
 
-			// Cleanup the particle group
-			auto p = particleGroups.back();
-			glDeleteBuffers(1, &p->vbo);
-			glDeleteBuffers(1, &p->vao);
-			delete p;
-
-			particleGroups.pop_back();
-		}
-	}
+	particleGroups.erase(
+	    std::remove_if(particleGroups.begin(), particleGroups.end(),
+	                   [](ParticleGroup &pg) { return pg.lifetime > 2.0f; }),
+	    particleGroups.end());
 
 	// Draw all the particles
-	for (auto pg : particleGroups) {
-		pg->lifetime += dt;
+	for (auto &pg : particleGroups) {
+		pg.lifetime += dt;
 
-		glBindVertexArray(pg->vao);
-		glProgramUniform1f(shaderProgram, timeLocation, pg->lifetime);
-		glProgramUniform2f(shaderProgram, accLocation, pg->acc.x, pg->acc.y);
-		glDrawArrays(GL_POINTS, 0, pg->count);
+		glBindVertexArray(pg.vao);
+		glProgramUniform1f(shaderProgram, timeLocation, pg.lifetime);
+		glProgramUniform2f(shaderProgram, accLocation, pg.acc.x, pg.acc.y);
+		glDrawArrays(GL_POINTS, 0, pg.count);
 		glBindVertexArray(0);
 	}
 }
@@ -260,32 +261,33 @@ void ParticleEmitter::draw(float dt) {
  * @param count        How many particles to emit
  * @param pos          Initial position of all particles
  * @param vel          Initial velocity of all particles
- * @param velDiviation Max diviation from vel in degrees
+ * @param velDeviation Max deviation from vel in degrees
  */
 void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
-                           sf::Vector2f acc, float velDiviation) {
-	std::cout << "Emitting particles!\n";
+                           sf::Vector2f acc, float velDeviation) {
+//	std::cout << "Emitting particles!\n";
 
 	std::vector<Particle> ps(count);
 	for (size_t i = 0; i < count; i++) {
-		auto velDiv = M_PI * velDiviation / 180.0f;
+		auto velDiv = M_PI * velDeviation / 180.0f;
 		auto angle  = rnd() * velDiv + M_PI / 2.0f;
 
 		ps[i].pos = pos;
-		ps[i].vel = sf::Vector2f(cos(angle), sin(angle)) * 0.80f * (rnd() + 1.0f);
+		ps[i].vel =
+		    sf::Vector2f(cos(angle), sin(angle)) * 0.80f * (rnd() + 1.0f);
 	}
 
 	// Upload particles
-	auto pg = new ParticleGroup(count, acc);
+	auto pg = ParticleGroup(count, acc);
 
 	// Make vertex array object
-	glGenVertexArrays(1, &pg->vao);
-	glBindVertexArray(pg->vao);
+	glGenVertexArrays(1, &pg.vao);
+	glBindVertexArray(pg.vao);
 
 	// Make a vertex buffer and set the vertex format
 	// Make vertex buffer object
-	glGenBuffers(1, &pg->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, pg->vbo);
+	glGenBuffers(1, &pg.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, pg.vbo);
 
 	// Upload data
 	glBufferData(GL_ARRAY_BUFFER, ps.size() * sizeof(Particle), ps.data(),
@@ -303,8 +305,9 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	std::cout << glewGetErrorString(glGetError()) << std::endl;
+//	std::cout << glewGetErrorString(glGetError()) << std::endl;
 
+	ps.clear();
 	particleGroups.push_back(pg);
 }
 
@@ -347,7 +350,7 @@ int main() {
 	// Setup opengl
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Setup shaders
 	std::vector<std::string> paths = {"../src/fountain-gpu.vert",
