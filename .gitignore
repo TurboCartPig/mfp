@@ -60,6 +60,8 @@ _deps
 
 .vscode/
 .idea/
+.vs/
+.clangd/
 
 html/
 latex/
