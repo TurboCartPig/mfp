@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SFML/Graphics.hpp"
+#include <SFML/System.hpp>
 #include <cmath>
 
 /**
@@ -15,7 +15,7 @@
  * @param  out_max  Upper limit of the second range
  * @return          The value in the second range
  */
-template <class T>
+template <typename T>
 T map_range(T v, T in_min, T in_max, T out_min, T out_max) {
     return (v - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
@@ -24,6 +24,21 @@ T map_range(T v, T in_min, T in_max, T out_min, T out_max) {
  * Returns the length of the given vector.
  */
 float length(const sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
+
+/**
+ * Limit a vectors magnitude.
+ *
+ * @param v   The vector
+ * @param len The max length of the vector
+ * @return    The vector now with a magnitude shorter or equaly to len
+ */
+sf::Vector2f limit(const sf::Vector2f v, float len) {
+	if (length(v) > len) {
+		return len * v / length(v);
+	} else {
+		return v;
+	}
+}
 
 /**
  * Calculate the dot product of two vectors.
@@ -44,16 +59,6 @@ float dot(const sf::Vector2f a, const sf::Vector2f b) {
  * @return  The projection vector
  */
 sf::Vector2f project(const sf::Vector2f a, const sf::Vector2f b) {
-    // auto aLen = length(a);
-    // auto cosine = dot(a, b) / aLen * length(b);
-    // return aLen * cosine * b;
-
-    // auto d     = dot(a, b);
-    // auto blen  = length(b);
-    // auto anorm = a / length(a);
-    // auto proj  = b * d / (blen * blen);
-    // return proj;
-
     // Remember to surround the length in parenthesis
     // With: Divide vector
     // Without: Multiply with vector

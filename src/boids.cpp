@@ -10,6 +10,8 @@
 
 #define _USE_MATH_DEFINES
 
+#include "math.h"
+
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <functional>
@@ -39,6 +41,7 @@ std::function<float()>        rnd;
 class Boid {
   public:
 	Boid();
+	virtual ~Boid() {}
 	virtual void update(float dt);
 	void         draw(sf::RenderWindow &w);
 	sf::Vector2f getPosition() const;
@@ -74,26 +77,6 @@ class Predator : public Boid {
 
 // Helper functions
 // ***********************************************************************
-
-/**
- * Returns the length of the given vector.
- */
-float length(const sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
-
-/**
- * Limit a vectors magnitude.
- *
- * @param v   The vector
- * @param len The max length of the vector
- * @return    The vector now with a magnitude shorter or equaly to len
- */
-sf::Vector2f limit(const sf::Vector2f v, float len) {
-	if (length(v) > len) {
-		return len * v / length(v);
-	} else {
-		return v;
-	}
-}
 
 /**
  * Computes whether or not a boid is visible from another.
