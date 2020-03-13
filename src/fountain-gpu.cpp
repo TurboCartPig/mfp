@@ -186,8 +186,9 @@ struct ParticleGroup {
 	}
 
 	~ParticleGroup() {
-		glDeleteBuffers(1, &vao);
 		glDeleteBuffers(1, &vbo);
+		// FIXME: This makes the program stop drawing for some reason?, Previous mem leak was due to this.
+		glDeleteVertexArrays(1, &vao);
 	}
 };
 
@@ -225,31 +226,21 @@ ParticleEmitter::ParticleEmitter(const GLuint program) {
 void ParticleEmitter::draw(float dt) {
 
 	// Delete dead particle groups
-//	for (size_t i = particleGroups.size(); i-- > 0;) {
-//		if (particleGroups[i].lifetime > 2.0f) {
-//			std::swap(particleGroups[i], particleGroups.back());
-//
-//			// Cleanup the particle group
-//			auto p = particleGroups.back();
-//			glDeleteBuffers(1, &p.vbo);
-//			glDeleteBuffers(1, &p.vao);
-//
-//			particleGroups.pop_back();
-//		}
-//	}
-
+	std::cout << "ParticleGroups size: " << particleGroups.size() << std::endl;
 	particleGroups.erase(
 	    std::remove_if(particleGroups.begin(), particleGroups.end(),
 	                   [](ParticleGroup &pg) { return pg.lifetime > 2.0f; }),
 	    particleGroups.end());
+	std::cout << "ParticleGroups size after: " << particleGroups.size()
+	          << std::endl;
 
 	// Draw all the particles
 	for (auto &pg : particleGroups) {
 		pg.lifetime += dt;
 
-		glBindVertexArray(pg.vao);
 		glProgramUniform1f(shaderProgram, timeLocation, pg.lifetime);
 		glProgramUniform2f(shaderProgram, accLocation, pg.acc.x, pg.acc.y);
+		glBindVertexArray(pg.vao);
 		glDrawArrays(GL_POINTS, 0, pg.count);
 		glBindVertexArray(0);
 	}
@@ -265,7 +256,7 @@ void ParticleEmitter::draw(float dt) {
  */
 void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
                            sf::Vector2f acc, float velDeviation) {
-//	std::cout << "Emitting particles!\n";
+	//	std::cout << "Emitting particles!\n";
 
 	std::vector<Particle> ps(count);
 	for (size_t i = 0; i < count; i++) {
@@ -282,7 +273,9 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 
 	// Make vertex array object
 	glGenVertexArrays(1, &pg.vao);
+	std::cout << "Gen: " << glewGetErrorString(glGetError()) << std::endl;
 	glBindVertexArray(pg.vao);
+	std::cout << "Bind: " << glewGetErrorString(glGetError()) << std::endl;
 
 	// Make a vertex buffer and set the vertex format
 	// Make vertex buffer object
@@ -301,13 +294,15 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
 	                      (GLvoid *)(2 * sizeof(float))); // Vel
 
+	//	glDisableVertexAttribArray(1);
+	//	glDisableVertexAttribArray(0);
+
 	// Unbind buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-//	std::cout << glewGetErrorString(glGetError()) << std::endl;
+	//	std::cout << glewGetErrorString(glGetError()) << std::endl;
 
-	ps.clear();
 	particleGroups.push_back(pg);
 }
 
@@ -344,6 +339,7 @@ int main() {
 	          << "\n\tAntialiasing level: " << s.antialiasingLevel << std::endl;
 
 	// Setup glew
+	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
 		std::cout << "Error: GLEW Failed to initialize\n";
 
