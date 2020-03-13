@@ -80,14 +80,9 @@ hits = 0
 for i in range(num_sim):
     doors = [True, False, False]
     shuffle(doors)
-    guest = choice(doors)
-    host = choice(doors)
-    # Host should not open a door with car behind it
-    # Could also just choose the last element, but is it still random then?
-    while host:
-        doors.append(host)
-        host = choice(doors)
-    # Win
+    guest = randint(0, 2)
+    guest = doors[guest]
+    # Host actions do not matter
     if guest:
         hits += 1
 
@@ -101,16 +96,13 @@ hits = 0
 for i in range(num_sim):
     doors = [True, False, False]
     shuffle(doors)
-    guest = choice(doors)
-    host = choice(doors)
-    # Host should not open a door with car behind it
-    # Could also just choose the last element, but is it still random then?
-    while host:
-        doors.append(host)
-        host = choice(doors)
-    guest = choice(doors)  # Switches to other door
+    guest = randint(0, 2)
+    del doors[guest]
+    host = doors.index(False)  # Host removes a goat
+    del doors[host]
+    guest = doors[0]  # Switches to other door
     if guest:
         hits += 1
 
-# Probability when swithing door = 0.42155
+# Probability when swithing door = 0.66657
 print("Probability when switching door", hits / num_sim)
