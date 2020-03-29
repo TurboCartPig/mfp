@@ -58,3 +58,5 @@ target_link_libraries(billiard sfml-graphics)
 
 add_executable(snakesandladders src/snakesandladders.cpp)
 target_link_libraries(snakesandladders Eigen3::Eigen)
+
+add_executable(binary-ops src/binary-ops.cpp)
