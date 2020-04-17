@@ -3,7 +3,7 @@ module Problem4 where
 -- Problem 4.1
 clamp1 :: Float -> Float
 clamp1 x =
-  if x < 0 
+  if x < 0
     then 0
   else if x > 1
     then 1
