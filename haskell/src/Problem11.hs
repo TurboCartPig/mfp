@@ -4,8 +4,10 @@ import Data.List
 
 -- | Calculate a probability based on an event space and a sample space
 -- in the form of lists.
+-- NOTE: genericLength is polymorphic over Num,
+-- as opposed to length which only returns Ints
 probability :: [a] -> [a] -> Double
-probability xs ys = (fromIntegral $ length xs) / (fromIntegral $ length ys)
+probability xs ys = genericLength xs / genericLength ys
 
 -- Problem 11.1
 -- Sample space of 4 dice
