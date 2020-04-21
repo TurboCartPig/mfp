@@ -31,6 +31,7 @@ library
       Problem10
       Problem11
       Maybe
+      IOTesting
   other-modules:
       Paths_haskell
   hs-source-dirs:
