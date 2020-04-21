@@ -28,6 +28,8 @@ library
       Problem6
 	  Problem7
       Problem8
+      Problem10
+      Problem11
       Maybe
   other-modules:
       Paths_haskell
