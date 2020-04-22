@@ -30,10 +30,10 @@ std::function<float()>         rnd;
 
 class Ball {
   public:
-    sf::CircleShape shape;
-    sf::Vector2f pos;
-    sf::Vector2f vel;
-    float mass;
+	sf::CircleShape shape;
+	sf::Vector2f    pos;
+	sf::Vector2f    vel;
+	float           mass;
 };
 
 // Helper Functions
@@ -144,11 +144,11 @@ int main() {
 
 		// Check for intersections
 		for (size_t i = 0; i < BALL_COUNT; i++) {
-            auto ball = gBalls[i];
-            auto mass1 = 1;
-            auto mass2 = 1;
+			auto ball  = gBalls[i];
+			auto mass1 = 1;
+			auto mass2 = 1;
 
-		    // Collision with other balls
+			// Collision with other balls
 			for (size_t j = 0; j < BALL_COUNT; j++) {
 				if (i == j)
 					continue;
@@ -161,8 +161,8 @@ int main() {
 			}
 
 			// Collision with walls
-			auto pos  = ball->getPosition();
-			auto rad  = ball->getRadius();
+			auto pos = ball->getPosition();
+			auto rad = ball->getRadius();
 			if (pos.x >= windowx - rad * 2) {
 				pos.x      = windowx - rad * 2;
 				gVels[i].x = -gVels[i].x;
