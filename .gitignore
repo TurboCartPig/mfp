@@ -1,0 +1,15 @@
+*.pdf
+
+.vscode/
+.idea/
+.vs/
+.clangd/
+
+html/
+latex/
+exportToHTML/
+documents/
+
+build/
+cmake-build-debug/
+cmake-build-release/
