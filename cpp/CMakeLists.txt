@@ -20,8 +20,7 @@ endif()
 
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-find_package(GLEW 2.1)
-find_package(Eigen3 3.3 REQUIRED CONFIG)
+find_package(GLEW 2.1 REQUIRED)
 
 add_executable(solar src/solar.cpp)
 target_link_libraries(solar sfml-graphics)
@@ -41,9 +40,6 @@ target_link_libraries(perlin sfml-graphics)
 add_executable(boids src/boids.cpp)
 target_link_libraries(boids sfml-graphics)
 
-add_executable(tetris src/tetris_live.cpp)
-target_link_libraries(tetris sfml-graphics)
-
 add_executable(fountain src/fountain.cpp)
 target_link_libraries(fountain sfml-graphics)
 
@@ -55,8 +51,5 @@ target_link_libraries(quat sfml-graphics)
 
 add_executable(billiard src/billiard.cpp)
 target_link_libraries(billiard sfml-graphics)
-
-add_executable(snakesandladders src/snakesandladders.cpp)
-target_link_libraries(snakesandladders Eigen3::Eigen)
 
 add_executable(binary-ops src/binary-ops.cpp)
