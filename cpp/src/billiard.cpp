@@ -144,20 +144,10 @@ class Ball {
 		auto T = sf::Vector2f(-N.y, N.x);
 		std::cout << "N: " << N << std::endl;
 
-		auto v1N = project(v1, N);
-		auto v1T = project(v1, T);
-		auto v2N = project(v2, N);
-		auto v2T = project(v2, T);
-
-		assert(almost_equal(length(v1), length(v1N + v1T), 2));
-		assert(almost_equal(length(v2), length(v2N + v2T), 2));
-
-		// FIXME: This is probably wrong
-		// I am definitively loosing information here
-		// auto v1N = length(project(v1, N));
-		// auto v1T = length(project(v1, T));
-		// auto v2T = length(project(v2, T));
-		// auto v2N = length(project(v2, N));
+		auto v1N = dot(v1, N);
+		auto v2N = dot(v2, N);
+		auto v1T = dot(v1, T);
+		auto v2T = dot(v2, T);
 
 		std::cout << "v1N: " << v1N << "\nv2N: " << v2N << std::endl;
 
@@ -169,13 +159,9 @@ class Ball {
 		    ((2.0f * m1) / (m1 + m2)) * v1N + ((m1 - m2) / (m1 + m2)) * v2N;
 
 		// 1D -> 2D
-		// FIXME: This is not correct, coupled with above
 		// *******************************************************************
-		// auto u1 = u1N * N + v1T * T;
-		// auto u2 = -u2N * N + -v2T * T; // Why am I adding minuses here?
-
-		auto u1 = u1N + v1T;
-		auto u2 = u2N + v2T;
+		auto u1 = u1N * N + v1T * T;
+		auto u2 = u2N * N + v2T * T;
 
 		std::cout << "u1: " << u1 << " u2: " << u2 << std::endl;
 
