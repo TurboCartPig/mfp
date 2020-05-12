@@ -1,6 +1,10 @@
-//
-// Created by dennis on 2/25/20.
-//
+/**
+ * A simple billiard ball collision demo.
+ *
+ * @author Dennis Kristiansen
+ * @date 12.05.2020
+ * @file billiard.cpp
+ */
 
 #include "math.h"
 
@@ -51,7 +55,8 @@ class Ball {
 	Ball(const sf::Vector2f pos, const sf::Vector2f vel) {
 		auto weight = rnd() + 1;
 		this->shape = sf::CircleShape(BALL_RADIUS * weight, BALL_POINT_COUNT);
-        this->shape.setOrigin(sf::Vector2(shape.getRadius(), shape.getRadius()));
+		this->shape.setOrigin(
+		    sf::Vector2(shape.getRadius(), shape.getRadius()));
 		this->shape.setFillColor(sf::Color::Red);
 		this->pos  = pos;
 		this->vel  = vel;
