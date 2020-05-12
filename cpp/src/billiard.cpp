@@ -15,15 +15,13 @@
 // ***********************************************************************
 static const uint32_t windowx          = 1000;
 static const uint32_t windowy          = 1000;
-static const float    BALL_RADIUS      = 10.0f;
-static const uint32_t BALL_POINT_COUNT = 10;
-static const size_t   BALL_COUNT       = 20;
+static const float    BALL_RADIUS      = 50.0f;
+static const uint32_t BALL_POINT_COUNT = 20;
+static const size_t   BALL_COUNT       = 10;
 
 // Globals
 // ***********************************************************************
 
-// std::vector<sf::CircleShape *> gBalls;
-// std::vector<sf::Vector2f>      gVels;
 std::vector<class Ball> gBalls;
 std::function<float()>  rnd;
 
@@ -40,7 +38,6 @@ class AABB {
 		this->max = max;
 	}
 
-	//  private:
 	sf::Vector2f min;
 	sf::Vector2f max;
 };
@@ -52,11 +49,13 @@ class Ball {
   public:
 	/// Construct a new ball with a given position
 	Ball(const sf::Vector2f pos, const sf::Vector2f vel) {
-		this->shape = sf::CircleShape(BALL_RADIUS, BALL_POINT_COUNT);
-		shape.setFillColor(sf::Color::Red);
+		auto weight = rnd() + 1;
+		this->shape = sf::CircleShape(BALL_RADIUS * weight, BALL_POINT_COUNT);
+        this->shape.setOrigin(sf::Vector2(shape.getRadius(), shape.getRadius()));
+		this->shape.setFillColor(sf::Color::Red);
 		this->pos  = pos;
 		this->vel  = vel;
-		this->mass = 1;
+		this->mass = weight;
 	}
 
 	/// Update the internal state of the ball
@@ -72,7 +71,7 @@ class Ball {
 
 	/// Is this ball intersecting another ball?
 	bool isIntersecting(const Ball &other) {
-		auto minD = this->shape.getRadius() + other.shape.getRadius();
+		auto minD = this->getRadius() + other.getRadius();
 		auto dis  = length(this->pos - other.pos);
 
 		return minD >= dis;
@@ -87,22 +86,22 @@ class Ball {
 	//	}
 
 	/// Perform collision between Ball and AABB if intersecting
-	void collide(const AABB &other) {
+	void collide(AABB &other) {
 		auto rad = shape.getRadius();
 
-		if (pos.x >= other.max.x - rad * 2) {
-			pos.x = other.max.x - rad * 2;
+		if (pos.x >= other.max.x - rad) {
+			pos.x = other.max.x - rad;
 			vel.x = -vel.x;
-		} else if (pos.x <= other.min.x) {
-			pos.x = other.min.x;
+		} else if (pos.x <= other.min.x + rad) {
+			pos.x = other.min.x + rad;
 			vel.x = -vel.x;
 		}
 
-		if (pos.y >= other.max.y - rad * 2) {
-			pos.y = other.max.y - rad * 2;
+		if (pos.y >= other.max.y - rad) {
+			pos.y = other.max.y - rad;
 			vel.y = -vel.y;
-		} else if (pos.y <= other.min.y) {
-			pos.y = other.min.y;
+		} else if (pos.y <= other.min.y + rad) {
+			pos.y = other.min.y + rad;
 			vel.y = -vel.y;
 		}
 
@@ -110,19 +109,71 @@ class Ball {
 	}
 
 	/// Perform collision between two balls if intersecting
-	void collide(const Ball &other) {
+	void collide(Ball &other) {
 		if (!isIntersecting(other))
 			return;
 
-		std::cout << "Boink!\n";
+		// Move objects out of collision
+		// FIXME: Moving out of one object might move you into another, causing
+		// weird bugs
+		// *******************************************************************
+		auto d = (other.getRadius() + this->getRadius() -
+		          length(other.pos - this->pos)) /
+		         2.0f;
 
-		// TODO: Now perform elastic collision
+		auto dir_other = d * other.vel / length(other.vel);
+		auto dir_this  = d * this->vel / length(this->vel);
+
+		other.pos -= dir_other;
+		this->pos -= dir_this;
+
+		// 2D -> 1D
+		// *******************************************************************
+		auto m1 = this->mass;
+		auto m2 = other.mass;
+		auto v1 = this->vel;
+		auto v2 = other.vel;
+
+		auto N = (this->pos - other.pos) / length(this->pos - other.pos);
+		auto T = sf::Vector2f(-N.y, N.x);
+		std::cout << "N: " << N << std::endl;
+
+		//	auto v1N = project(v1, N);
+		//	auto v2N = project(v2, N);
+		//	auto v1T = project(v1, T);
+		//	auto v2T = project(v2, T);
+
+		// FIXME: This is probably wrong
+		auto v1N = length(project(v1, N));
+		auto v2N = length(project(v2, N));
+		auto v1T = length(project(v1, T));
+		auto v2T = length(project(v2, T));
+		std::cout << "v1N: " << v1N << "\nv2N: " << v2N << std::endl;
+
+		// Collide
+		// *******************************************************************
+		auto u1N =
+		    ((m1 - m2) / (m1 + m2)) * v1N + ((2.0f * m2) / (m1 + m2)) * v2N;
+		auto u2N =
+		    ((2.0f * m1) / (m1 + m2)) * v1N + ((m1 - m2) / (m1 + m2)) * v2N;
+
+		// 1D -> 2D
+		// FIXME: This is not correct, coupled with above
+		// *******************************************************************
+		auto u1 = u1N * N + v1T * T;
+		auto u2 = -u2N * N + -v2T * T;
+		std::cout << "u1: " << u1 << " u2: " << u2 << std::endl;
+
+		this->vel = u1;
+		other.vel = u2;
 	}
 
 	void setPosition(const sf::Vector2f pos) {
 		this->pos = pos;
 		shape.setPosition(pos);
 	}
+
+	float getRadius() const { return shape.getRadius(); }
 
   private:
 	sf::CircleShape shape;
@@ -156,7 +207,7 @@ int main() {
 
 	// Create window
 	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "Billiard Balls");
-	window.setFramerateLimit(30);
+	window.setFramerateLimit(165);
 
 	// Screenshot
 	sf::Image    capture;
@@ -176,7 +227,8 @@ int main() {
 		auto pos = sf::Vector2f(windowx / 2, windowy / 2);
 
 		float speed = 100.0f;
-		auto  vel   = speed * sf::Vector2f(rnd(), rnd());
+		float rand  = rnd();
+		auto  vel   = speed * sf::Vector2f(rand, 1.0f - rand);
 
 		auto ball = Ball(pos, vel);
 		gBalls.push_back(ball);
@@ -235,12 +287,12 @@ int main() {
 			ball.collide(screen);
 
 			// Collide with other balls
-			for (const auto &other : gBalls) {
+			for (auto &other : gBalls) {
 				// Skip if self
 				if (&ball == &other)
 					continue;
 
-                ball.collide(other);
+				ball.collide(other);
 			}
 		}
 
@@ -254,6 +306,7 @@ int main() {
 
 		window.clear();
 
+		// Draw the balls
 		for (auto &ball : gBalls)
 			ball.draw(window);
 
