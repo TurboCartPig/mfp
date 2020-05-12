@@ -9,6 +9,7 @@
 #include "math.h"
 
 #include <SFML/Graphics.hpp>
+#include <cassert>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -143,16 +144,21 @@ class Ball {
 		auto T = sf::Vector2f(-N.y, N.x);
 		std::cout << "N: " << N << std::endl;
 
-		//	auto v1N = project(v1, N);
-		//	auto v2N = project(v2, N);
-		//	auto v1T = project(v1, T);
-		//	auto v2T = project(v2, T);
+		auto v1N = project(v1, N);
+		auto v1T = project(v1, T);
+		auto v2N = project(v2, N);
+		auto v2T = project(v2, T);
+
+		assert(almost_equal(length(v1), length(v1N + v1T), 2));
+		assert(almost_equal(length(v2), length(v2N + v2T), 2));
 
 		// FIXME: This is probably wrong
-		auto v1N = length(project(v1, N));
-		auto v2N = length(project(v2, N));
-		auto v1T = length(project(v1, T));
-		auto v2T = length(project(v2, T));
+		// I am definitively loosing information here
+		// auto v1N = length(project(v1, N));
+		// auto v1T = length(project(v1, T));
+		// auto v2T = length(project(v2, T));
+		// auto v2N = length(project(v2, N));
+
 		std::cout << "v1N: " << v1N << "\nv2N: " << v2N << std::endl;
 
 		// Collide
@@ -165,8 +171,12 @@ class Ball {
 		// 1D -> 2D
 		// FIXME: This is not correct, coupled with above
 		// *******************************************************************
-		auto u1 = u1N * N + v1T * T;
-		auto u2 = -u2N * N + -v2T * T;
+		// auto u1 = u1N * N + v1T * T;
+		// auto u2 = -u2N * N + -v2T * T; // Why am I adding minuses here?
+
+		auto u1 = u1N + v1T;
+		auto u2 = u2N + v2T;
+
 		std::cout << "u1: " << u1 << " u2: " << u2 << std::endl;
 
 		this->vel = u1;
@@ -287,17 +297,13 @@ int main() {
 		// ***************************************************************
 
 		// Collisions
-		for (auto &ball : gBalls) {
+		for (auto i = 0; i < gBalls.size(); i++) {
 			// Collide with wall
-			ball.collide(screen);
+			gBalls[i].collide(screen);
 
 			// Collide with other balls
-			for (auto &other : gBalls) {
-				// Skip if self
-				if (&ball == &other)
-					continue;
-
-				ball.collide(other);
+			for (auto j = i + 1; j < gBalls.size(); j++) {
+				gBalls[i].collide(gBalls[j]);
 			}
 		}
 
