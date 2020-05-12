@@ -59,8 +59,15 @@ float dot(const sf::Vector2f a, const sf::Vector2f b) {
  * @return  The projection vector
  */
 sf::Vector2f project(const sf::Vector2f a, const sf::Vector2f b) {
-    // Remember to surround the length in parenthesis
-    // With: Divide vector
-    // Without: Multiply with vector
     return b * dot(a, b) / (length(b) * length(b));
+}
+
+/**
+ * Operator overloading for vector pretty printing.
+ * @param os  Output stream
+ * @param vec Vector to print
+ * @return    Output stream with vector pretty printed
+ */
+std::ostream& operator<<(std::ostream &os, const sf::Vector2f &vec) {
+	return os << "[" << vec.x << "," << vec.y << "]";
 }
