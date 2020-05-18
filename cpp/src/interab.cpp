@@ -14,8 +14,8 @@
 #include <functional>
 #include <iostream>
 
-const uint32_t windowx = 1200;
-const uint32_t windowy = 800;
+const uint32_t WINDOWX = 1200;
+const uint32_t WINDOWY = 800;
 const uint32_t r       = 50;
 
 uint8_t u8lerp(uint8_t a, uint8_t b, float t) {
@@ -90,7 +90,7 @@ sf::Vector2f smoothstep(sf::Vector2f p_0, sf::Vector2f p_1, float t,
 int main() {
 	// Initialization
 	// *******************************************************************
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy),
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY),
 	                        "Interpolation Assignment - Part A and B");
 	window.setFramerateLimit(30);
 
@@ -110,7 +110,7 @@ int main() {
 
 	disk.setRadius(r);
 	disk.setFillColor(sf::Color::Black);
-	disk.setPosition(sf::Vector2f(windowx / 2 - r, windowy / 2 - r));
+	disk.setPosition(sf::Vector2f(WINDOWX / 2 - r, WINDOWY / 2 - r));
 
 	sf::Clock clock;
 	clock.restart();
@@ -144,10 +144,10 @@ int main() {
 
 		if (t_1 <= 3.0f) {
 			obj_1.setPosition(lerp(sf::Vector2f(r, r),
-			                       sf::Vector2f(windowx - r, windowy - r),
+			                       sf::Vector2f(WINDOWX - r, WINDOWY - r),
 			                       t_1 / 3.0f));
 		} else {
-			obj_1.setPosition(lerp(sf::Vector2f(windowx - r, windowy - r),
+			obj_1.setPosition(lerp(sf::Vector2f(WINDOWX - r, WINDOWY - r),
 			                       sf::Vector2f(r, r), (t_1 - 3.0f) / 3.0f));
 		}
 
@@ -161,12 +161,12 @@ int main() {
 
 		if (t_2 <= 5.0f) {
 			obj_2.setPosition(quadratic_bezier_curve(
-			    sf::Vector2f(r, r), sf::Vector2f(windowx, 0.0f),
-			    sf::Vector2f(windowx - r, windowy - r), t_2 / 5.0f));
+			    sf::Vector2f(r, r), sf::Vector2f(WINDOWX, 0.0f),
+			    sf::Vector2f(WINDOWX - r, WINDOWY - r), t_2 / 5.0f));
 		} else {
 			obj_2.setPosition(quadratic_bezier_curve(
-			    sf::Vector2f(windowx - r, windowy - r),
-			    sf::Vector2f(windowx, 0.0f), sf::Vector2f(r, r),
+			    sf::Vector2f(WINDOWX - r, WINDOWY - r),
+			    sf::Vector2f(WINDOWX, 0.0f), sf::Vector2f(r, r),
 			    (t_2 - 5.0f) / 5.0f));
 		}
 
@@ -181,12 +181,12 @@ int main() {
 		auto order_3_curve = [](float t) { return t * t * (3.0f - 2.0f * t); };
 
 		if (t_3 <= 6.0f) {
-			obj_3.setPosition(smoothstep(sf::Vector2f(windowx / 2, r),
-			                             sf::Vector2f(windowx / 2, windowy - r),
+			obj_3.setPosition(smoothstep(sf::Vector2f(WINDOWX / 2, r),
+			                             sf::Vector2f(WINDOWX / 2, WINDOWY - r),
 			                             t_3 / 6.0f, order_3_curve));
 		} else {
-			obj_3.setPosition(smoothstep(sf::Vector2f(windowx / 2, windowy - r),
-			                             sf::Vector2f(windowx / 2, r),
+			obj_3.setPosition(smoothstep(sf::Vector2f(WINDOWX / 2, WINDOWY - r),
+			                             sf::Vector2f(WINDOWX / 2, r),
 			                             (t_3 - 6.0f) / 6.0f, order_3_curve));
 		}
 
@@ -196,15 +196,15 @@ int main() {
 		if (t_3 <= 6.0f) {
 			auto u = pow(cos(M_PI / 2.0 * (t_3) / 6.0f), 2);
 			obj_4.setPosition(cubic_bezier_curve(
-			    sf::Vector2f(r, windowy / 2), sf::Vector2f(windowx / 3, 0),
-			    sf::Vector2f(2 * windowx / 3, windowy),
-			    sf::Vector2f(windowx - r, windowy / 2), u));
+			    sf::Vector2f(r, WINDOWY / 2), sf::Vector2f(WINDOWX / 3, 0),
+			    sf::Vector2f(2 * WINDOWX / 3, WINDOWY),
+			    sf::Vector2f(WINDOWX - r, WINDOWY / 2), u));
 		} else {
 			auto u = pow(cos(M_PI / 2.0 * (t_3 - 6.0f) / 6.0f), 2);
 			obj_4.setPosition(cubic_bezier_curve(
-			    sf::Vector2f(windowx - r, windowy / 2),
-			    sf::Vector2f(2 * windowx / 3, windowy),
-			    sf::Vector2f(windowx / 3, 0), sf::Vector2f(r, windowy / 2), u));
+			    sf::Vector2f(WINDOWX - r, WINDOWY / 2),
+			    sf::Vector2f(2 * WINDOWX / 3, WINDOWY),
+			    sf::Vector2f(WINDOWX / 3, 0), sf::Vector2f(r, WINDOWY / 2), u));
 		}
 
 		// Interpolate rgb values

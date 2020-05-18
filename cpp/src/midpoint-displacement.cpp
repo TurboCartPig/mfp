@@ -15,18 +15,14 @@
 #include <random>
 #include <vector>
 
-const unsigned int windowx = 1200;
-const unsigned int windowy = 800;
+constexpr uint32_t WINDOWX = 1200;
+constexpr uint32_t WINDOWY = 800;
 
 int main() {
-	// Generate seed
-	std::string seed_str;
-	std::cout << "Seed string: ";
-	getline(std::cin, seed_str);
-	std::seed_seq seed(seed_str.begin(), seed_str.end());
-
-	// Initialize generator and distribution
-	std::default_random_engine            generator(seed);
+	// Init randomness
+	// *******************************************************************
+	std::random_device                    rd;
+	std::default_random_engine            generator(rd());
 	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
 	auto rnd = std::bind(distribution, generator);
 
@@ -65,7 +61,7 @@ int main() {
 	}
 
 	// Create window
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy),
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY),
 	                        "Mid-point displacement Algorithm");
 	window.setFramerateLimit(30);
 
@@ -73,8 +69,8 @@ int main() {
 	sf::VertexArray shape(sf::PrimitiveType::LineStrip, len);
 	for (size_t i = 0; i < len; i++) {
 		shape[i].position =
-		    sf::Vector2f((float)i / (float)(len - 1) * (float)windowx,
-		                 (v[i] + 1.25f) * windowy / 2);
+		    sf::Vector2f((float)i / (float)(len - 1) * (float)WINDOWX,
+		                 (v[i] + 1.25f) * WINDOWY / 2);
 	}
 
 	// Game loop

@@ -27,8 +27,8 @@
 
 // Constants
 // ***********************************************************************
-static const uint32_t windowx       = 1000;
-static const uint32_t windowy       = 1000;
+static const uint32_t WINDOWX       = 1000;
+static const uint32_t WINDOWY       = 1000;
 static const size_t   MAX_OBJ_COUNT = 1000;
 
 // Globals
@@ -307,18 +307,12 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 }
 
 int main() {
-	// Setup random
-	// Generate seed
-	std::string seed_str;
-	// std::cout << "Seed string: ";
-	// getline(std::cin, seed_str);
-	seed_str = "just so that I don't have to type it in every time";
-	std::seed_seq seed(seed_str.begin(), seed_str.end());
-
-	// Initialize generator and distribution
-	std::default_random_engine            generator(seed);
-	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-	rnd = std::bind(distribution, generator);
+    // Init randomness
+    // *******************************************************************
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+    rnd = std::bind(distribution, generator);
 
 	// Setup window
 	sf::ContextSettings context(24, 8, 0, 4, 5,
@@ -326,7 +320,7 @@ int main() {
 	                                sf::ContextSettings::Attribute::Debug,
 	                            true);
 
-	sf::Window window(sf::VideoMode(windowx, windowy), "The Fountain",
+	sf::Window window(sf::VideoMode(WINDOWX, WINDOWY), "The Fountain",
 	                  sf::Style::Default, context);
 	window.setVerticalSyncEnabled(true);
 	window.setActive(true);

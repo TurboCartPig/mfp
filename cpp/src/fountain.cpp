@@ -25,13 +25,13 @@
 
 // Constants
 // ***********************************************************************
-static const uint32_t windowx                      = 1000;
-static const uint32_t windowy                      = 1000;
-static const size_t   MAX_OBJ_COUNT                = 100000;
-static const float    PARTICLE_RADIUS              = 1.0f;
-static const float    PARTICLE_EXPLOSION_TIME      = 1.0f;
-static const size_t   PARTICLE_SPAWN_RATE          = 50;
-static const size_t   PARTICLE_EXPLOSION_PARTICLES = 10;
+constexpr uint32_t WINDOWX                      = 1000;
+constexpr uint32_t WINDOWY                      = 1000;
+constexpr size_t   MAX_OBJ_COUNT                = 100000;
+constexpr float    PARTICLE_RADIUS              = 1.0f;
+constexpr float    PARTICLE_EXPLOSION_TIME      = 1.0f;
+constexpr size_t   PARTICLE_SPAWN_RATE          = 50;
+constexpr size_t   PARTICLE_EXPLOSION_PARTICLES = 10;
 
 // Globals
 // ***********************************************************************
@@ -94,7 +94,7 @@ PhysicsObject::PhysicsObject() {
 	auto speed = map_range(rnd(), -1.0f, 1.0f, 100.0f, 500.0f);
 
 	// Can I give the object an impulse instead of setting the velocity
-	pos = sf::Vector2f(windowx / 2, windowy);
+	pos = sf::Vector2f(WINDOWX / 2, WINDOWY);
 	vel = sf::Vector2f(speed * cos(angle), speed * sin(angle));
 	acc = sf::Vector2f(0.0f, 0.0f);
 
@@ -130,8 +130,8 @@ void PhysicsObject::update(float dt) {
 
 	// Is the particle outside the screen
 	auto d       = shape.getRadius() * shape.getRadius();
-	auto outside = pos.x + d < 0.0f || pos.x > windowx + d ||
-	               pos.y + d < 0.0f || pos.y > windowy + d;
+	auto outside = pos.x + d < 0.0f || pos.x > WINDOWX + d ||
+	               pos.y + d < 0.0f || pos.y > WINDOWY + d;
 
 	lifetime += dt;
 
@@ -160,26 +160,18 @@ void PhysicsObject::draw(sf::RenderWindow &w) {
 // ***********************************************************************
 
 int main() {
-	// Init randomness
-	// *******************************************************************
-
-	// Generate seed
-	std::string seed_str;
-	// std::cout << "Seed string: ";
-	// getline(std::cin, seed_str);
-	seed_str = "just so that I don't have to type it in every time";
-	std::seed_seq seed(seed_str.begin(), seed_str.end());
-
-	// Initialize generator and distribution
-	std::default_random_engine            generator(seed);
-	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-	rnd = std::bind(distribution, generator);
+    // Init randomness
+    // *******************************************************************
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+    rnd = std::bind(distribution, generator);
 
 	// Init sfml stuff
 	// *******************************************************************
 
 	// Create window
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "The Fountain");
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY), "The Fountain");
 	window.setFramerateLimit(30);
 
 	// Screenshot

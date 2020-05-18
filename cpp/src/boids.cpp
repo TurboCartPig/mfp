@@ -23,10 +23,10 @@
 // Constants
 // ***********************************************************************
 
-static const uint32_t windowx  = 1000;
-static const uint32_t windowy  = 1000;
-static const uint32_t num_obj  = 100;
-static const float    maxangle = 6.0f * M_PI_4;
+constexpr uint32_t WINDOWX     = 1000;
+constexpr uint32_t WINDOWY     = 1000;
+constexpr uint32_t NUM_OBJECTS = 100;
+constexpr float    MAX_ANGLE   = 6.0f * M_PI_4;
 
 // Globals
 // ***********************************************************************
@@ -95,7 +95,7 @@ bool visible(const Boid *a, const Boid *b) {
 
 	auto angle = b_angle - a_angle;
 
-	return angle < maxangle && angle > -maxangle;
+	return angle < MAX_ANGLE && angle > -MAX_ANGLE;
 }
 
 // Boid impl
@@ -105,12 +105,13 @@ bool visible(const Boid *a, const Boid *b) {
  * Initializes the boid with a random position and velocity.
  */
 Boid::Boid() {
-	pos        = sf::Vector2f(rnd() * windowx / 2.0f, rnd() * windowy / 2.0f);
+	pos        = sf::Vector2f(rnd() * WINDOWX / 2.0f, rnd() * WINDOWY / 2.0f);
 	auto angle = (rnd() + 1.0f) * M_PI;
 	vel        = sf::Vector2f(maxspeed * cos(angle), maxspeed * sin(angle));
 	shape      = sf::CircleShape(10.0f, 3);
 	shape.setPosition(pos - sf::Vector2f(shape.getRadius(), shape.getRadius()));
 	shape.setFillColor(sf::Color::Red);
+	shape.setOrigin(5.0f, 5.0f);
 }
 
 /**
@@ -131,15 +132,15 @@ void Boid::update(float dt) {
 	pos += vel * dt;
 
 	// Wrap around the screen
-	if (pos.x > windowx + shape.getRadius())
-		pos.x -= windowx + shape.getRadius();
+	if (pos.x > WINDOWX + shape.getRadius())
+		pos.x -= WINDOWX + shape.getRadius();
 	else if (pos.x < -shape.getRadius())
-		pos.x += windowx + shape.getRadius();
+		pos.x += WINDOWX + shape.getRadius();
 
-	if (pos.y > windowy + shape.getRadius())
-		pos.y -= windowy + shape.getRadius();
+	if (pos.y > WINDOWY + shape.getRadius())
+		pos.y -= WINDOWY + shape.getRadius();
 	else if (pos.y < -shape.getRadius())
-		pos.y += windowy + shape.getRadius();
+		pos.y += WINDOWY + shape.getRadius();
 }
 
 /**
@@ -214,7 +215,7 @@ sf::Vector2f Boid::computeSeparation() {
 		auto dist = length(diff);
 		if (dist > 0.0f && dist < separationdist && visible(this, other)) {
 			// FIXME: This should scale vectors based on distance. Closer boids
-			// should give greator reaction
+			// should give greater reaction
 			diff /= dist;
 			diff /= dist;
 			ret += diff;
@@ -284,7 +285,7 @@ sf::Vector2f Boid::computeFlee() {
 // ***********************************************************************
 
 Predator::Predator() {
-	pos        = sf::Vector2f(rnd() * windowx / 2.0f, rnd() * windowy / 2.0f);
+	pos        = sf::Vector2f(rnd() * WINDOWX / 2.0f, rnd() * WINDOWY / 2.0f);
 	auto angle = (rnd() + 1.0f) * M_PI;
 	vel        = sf::Vector2f(maxspeed * cos(angle), maxspeed * sin(angle));
 	shape      = sf::CircleShape(20.0f, 3);
@@ -292,8 +293,7 @@ Predator::Predator() {
 	shape.setFillColor(sf::Color::Yellow);
 }
 
-// TODO: Kan jeg exponere vektene og droppe denne funksjonen?
-// TODO: Skal jeg impl jakt og fangst?
+// TODO: Can I expose the weights instead of this
 void Predator::update(float dt) {
 	auto v1 = computeCohesion();
 
@@ -302,15 +302,15 @@ void Predator::update(float dt) {
 	pos += vel * dt;
 
 	// Wrap around the screen
-	if (pos.x > windowx + shape.getRadius())
-		pos.x -= windowx + shape.getRadius();
+	if (pos.x > WINDOWX + shape.getRadius())
+		pos.x -= WINDOWX + shape.getRadius();
 	else if (pos.x < -shape.getRadius())
-		pos.x += windowx + shape.getRadius();
+		pos.x += WINDOWX + shape.getRadius();
 
-	if (pos.y > windowy + shape.getRadius())
-		pos.y -= windowy + shape.getRadius();
+	if (pos.y > WINDOWY + shape.getRadius())
+		pos.y -= WINDOWY + shape.getRadius();
 	else if (pos.y < -shape.getRadius())
-		pos.y += windowy + shape.getRadius();
+		pos.y += WINDOWY + shape.getRadius();
 }
 // Main
 // ***********************************************************************
@@ -318,25 +318,18 @@ void Predator::update(float dt) {
 int main() {
 	// Init randomness
 	// *******************************************************************
-
-	// Generate seed
-	std::string seed_str;
-	std::cout << "Seed string: ";
-	getline(std::cin, seed_str);
-	std::seed_seq seed(seed_str.begin(), seed_str.end());
-
-	// Initialize generator and distribution
-	std::default_random_engine            generator(seed);
+	std::random_device rd;
+	std::default_random_engine generator(rd());
 	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
 	rnd = std::bind(distribution, generator);
 
 	// Create window
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "Perlin noise");
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY), "Perlin noise");
 	window.setFramerateLimit(30);
 
 	// Setup boids
-	gBoids.resize(num_obj);
-	for (size_t i = 0; i < num_obj; i++)
+	gBoids.resize(NUM_OBJECTS);
+	for (size_t i = 0; i < NUM_OBJECTS; i++)
 		gBoids[i] = new Boid();
 
 	gPredators.resize(2);

@@ -9,8 +9,6 @@
 #include "math.h"
 
 #include <SFML/Graphics.hpp>
-#include <cassert>
-#include <cmath>
 #include <functional>
 #include <iostream>
 #include <random>
@@ -18,11 +16,11 @@
 
 // Constants
 // ***********************************************************************
-static const uint32_t windowx          = 1000;
-static const uint32_t windowy          = 1000;
-static const float    BALL_RADIUS      = 50.0f;
-static const uint32_t BALL_POINT_COUNT = 20;
-static const size_t   BALL_COUNT       = 10;
+constexpr uint32_t WINDOWX          = 1000;
+constexpr uint32_t WINDOWY          = 1000;
+constexpr float    BALL_RADIUS      = 50.0f;
+constexpr uint32_t BALL_POINT_COUNT = 20;
+constexpr size_t   BALL_COUNT       = 10;
 
 // Globals
 // ***********************************************************************
@@ -188,26 +186,18 @@ class Ball {
  * @return EXIT_SUCCESS
  */
 int main() {
-	// Init randomness
-	// *******************************************************************
+    // Init randomness
+    // *******************************************************************
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+    rnd = std::bind(distribution, generator);
 
-	// Generate seed
-	std::string seed_str;
-	// std::cout << "Seed string: ";
-	// getline(std::cin, seed_str);
-	seed_str = "just so that I don't have to type it in every time";
-	std::seed_seq seed(seed_str.begin(), seed_str.end());
-
-	// Initialize generator and distribution
-	std::default_random_engine            generator(seed);
-	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-	rnd = std::bind(distribution, generator);
-
-	// Init sfml stuff
+    // Init sfml stuff
 	// *******************************************************************
 
 	// Create window
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "Billiard Balls");
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY), "Billiard Balls");
 	window.setFramerateLimit(165);
 
 	// Screenshot
@@ -220,12 +210,12 @@ int main() {
 
 	// Create screen bounding box
 	auto screen =
-	    AABB(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(windowx, windowy));
+	    AABB(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(WINDOWX, WINDOWY));
 
 	// Spawn all the balls
 	gBalls.reserve(BALL_COUNT);
 	for (size_t i = 0; i < BALL_COUNT; i++) {
-		auto pos = sf::Vector2f(windowx / 2, windowy / 2);
+		auto pos = sf::Vector2f(WINDOWX / 2, WINDOWY / 2);
 
 		float speed = 100.0f;
 		float rand  = rnd();
@@ -241,8 +231,8 @@ int main() {
 
 		do {
 			colliding = false;
-			gBalls[i].setPosition(sf::Vector2f((rnd() + 1) * windowx / 2,
-			                                   (rnd() + 1) * windowy / 2));
+			gBalls[i].setPosition(sf::Vector2f((rnd() + 1) * WINDOWX / 2,
+			                                   (rnd() + 1) * WINDOWY / 2));
 			for (size_t j = 0; j < gBalls.size(); j++) {
 				if (i == j)
 					continue;

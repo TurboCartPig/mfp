@@ -11,8 +11,8 @@
 
 #include <cmath>
 
-const int windowx = 1200;
-const int windowy = 800;
+const int WINDOWX = 1200;
+const int WINDOWY = 800;
 
 class Planet {
   public:
@@ -68,9 +68,9 @@ class Planet {
 
 int main(int argc, char *argv[]) {
 	// We open up a window
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "Solar");
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY), "Solar");
 
-	sf::Vector2f origo(windowx / 2.0F, windowy / 2.0F);
+	sf::Vector2f origo(WINDOWX / 2.0F, WINDOWY / 2.0F);
 
 	// Init planets
 	Planet sun(0.0F, 0.0F, 0.0F, 30.0F, 1.0F, sf::Color::Yellow, origo);

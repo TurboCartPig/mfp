@@ -17,9 +17,9 @@
 // Constants
 // ***********************************************************************
 
-const unsigned int windowx = 1000;
-const unsigned int windowy = 1000;
-const unsigned int SG_SIZE = 100;
+constexpr uint32_t WINDOWX = 1000;
+constexpr uint32_t WINDOWY = 1000;
+constexpr uint32_t SG_SIZE = 100;
 
 // Globals
 // ***********************************************************************
@@ -173,20 +173,12 @@ float perlin3(sf::Vector2f p) {
 // ***********************************************************************
 
 int main() {
-
-	// Init randomness
-	// *******************************************************************
-
-	// Generate seed
-	std::string seed_str;
-	std::cout << "Seed string: ";
-	getline(std::cin, seed_str);
-	std::seed_seq seed(seed_str.begin(), seed_str.end());
-
-	// Initialize generator and distribution
-	std::default_random_engine            generator(seed);
-	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-	rnd = std::bind(distribution, generator);
+    // Init randomness
+    // *******************************************************************
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+    rnd = std::bind(distribution, generator);
 
 	// Setup seedgrid
 	gSeedgrid.resize(SG_SIZE * SG_SIZE);
@@ -199,7 +191,7 @@ int main() {
 	// *******************************************************************
 
 	// Create window
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy), "Perlin noise");
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY), "Perlin noise");
 	window.setFramerateLimit(30);
 
 	// Screenshot
@@ -209,7 +201,7 @@ int main() {
 
 	sf::Texture texture;
 	// Create texture
-	if (!texture.create(windowx, windowy)) {
+	if (!texture.create(WINDOWX, WINDOWY)) {
 		std::cout << "Error: Texture not created" << std::endl;
 		exit(EXIT_FAILURE);
 	}
@@ -222,24 +214,24 @@ int main() {
 
 	// Create table of pixels
 	// times 4 because pixels = (red, green, blue, alpha)
-	auto *pixels = new uint8_t[windowx * windowy * 4];
+	auto *pixels = new uint8_t[WINDOWX * WINDOWY * 4];
 
 	// Generate an image from noise
 	// *******************************************************************
-	for (size_t x = 0; x < windowx; x++) {
-		for (size_t y = 0; y < windowy; y++) {
+	for (size_t x = 0; x < WINDOWX; x++) {
+		for (size_t y = 0; y < WINDOWY; y++) {
 			auto    c                     = dumb.getPixel(x, y);
 			uint8_t e                     = perlin3(sf::Vector2f(x, y)) * 255;
-			pixels[4 * (x + y * windowx)] = clamp(c.r + e, 0, 255);
-			pixels[4 * (x + y * windowx) + 1] = clamp(c.g + e, 0, 255);
-			pixels[4 * (x + y * windowx) + 2] = clamp(c.b + e, 0, 255);
-			pixels[4 * (x + y * windowx) + 3] = 255; // Should always be 255!!!
+			pixels[4 * (x + y * WINDOWX)] = clamp(c.r + e, 0, 255);
+			pixels[4 * (x + y * WINDOWX) + 1] = clamp(c.g + e, 0, 255);
+			pixels[4 * (x + y * WINDOWX) + 2] = clamp(c.b + e, 0, 255);
+			pixels[4 * (x + y * WINDOWX) + 3] = 255; // Should always be 255!!!
 		}
 	}
 
 	texture.update(pixels);
 
-	auto   center     = sf::Vector2f(windowx / 2, windowy / 2);
+	auto   center     = sf::Vector2f(WINDOWX / 2, WINDOWY / 2);
 	auto   resolution = 260.0f;
 	auto   intensity  = 30;
 	auto   radius     = 550.0f;

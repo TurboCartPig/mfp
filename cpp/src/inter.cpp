@@ -17,10 +17,10 @@
 // ***********************************************************************
 const float        r       = 160.0f; // Radius of the circle
 const unsigned int num     = 100;    // Number of triangles
-const unsigned int windowx = 1200;
-const unsigned int windowy = 800;
-const sf::Vector2f center(windowx / 2.0f,
-                          windowy / 2.0f // Coord of the center point
+const unsigned int WINDOWX = 1200;
+const unsigned int WINDOWY = 800;
+const sf::Vector2f center(WINDOWX / 2.0f,
+                          WINDOWY / 2.0f // Coord of the center point
 );
 
 // Forward declarations
@@ -99,7 +99,7 @@ sf::Vector2f circle(float i) {
 }
 
 int main() {
-	sf::RenderWindow window(sf::VideoMode(windowx, windowy),
+	sf::RenderWindow window(sf::VideoMode(WINDOWX, WINDOWY),
 	                        "Interpolation Assignment");
 	window.setFramerateLimit(30);
 
