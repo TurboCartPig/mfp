@@ -18,7 +18,7 @@ out Fragment {
 void main() {
     // Skip if not visible
     if (particle[0].alpha <= 0.0)
-        return;
+    return;
 
     float alpha = particle[0].alpha;
 

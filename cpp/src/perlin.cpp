@@ -173,12 +173,12 @@ float perlin3(sf::Vector2f p) {
 // ***********************************************************************
 
 int main() {
-    // Init randomness
-    // *******************************************************************
-    std::random_device rd;
-    std::default_random_engine generator(rd());
-    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-    rnd = std::bind(distribution, generator);
+	// Init randomness
+	// *******************************************************************
+	std::random_device                    rd;
+	std::default_random_engine            generator(rd());
+	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+	rnd = std::bind(distribution, generator);
 
 	// Setup seedgrid
 	gSeedgrid.resize(SG_SIZE * SG_SIZE);

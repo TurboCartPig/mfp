@@ -186,14 +186,14 @@ class Ball {
  * @return EXIT_SUCCESS
  */
 int main() {
-    // Init randomness
-    // *******************************************************************
-    std::random_device rd;
-    std::default_random_engine generator(rd());
-    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-    rnd = std::bind(distribution, generator);
+	// Init randomness
+	// *******************************************************************
+	std::random_device                    rd;
+	std::default_random_engine            generator(rd());
+	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+	rnd = std::bind(distribution, generator);
 
-    // Init sfml stuff
+	// Init sfml stuff
 	// *******************************************************************
 
 	// Create window

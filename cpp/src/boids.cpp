@@ -318,8 +318,8 @@ void Predator::update(float dt) {
 int main() {
 	// Init randomness
 	// *******************************************************************
-	std::random_device rd;
-	std::default_random_engine generator(rd());
+	std::random_device                    rd;
+	std::default_random_engine            generator(rd());
 	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
 	rnd = std::bind(distribution, generator);
 

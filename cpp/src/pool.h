@@ -22,8 +22,8 @@ template <class T>
 class Pool {
   public:
 	Pool(size_t size = MIN_SIZE);
-	T &  create();
-	void map(std::function<bool(T &)> fn);
+	T &    create();
+	void   map(std::function<bool(T &)> fn);
 	size_t size() const { return firstDead; }
 
   private:
@@ -37,7 +37,7 @@ class Pool {
 
 template <class T>
 Pool<T>::Pool(size_t size) {
-    mem = (T*)malloc(size);
+	mem = (T *)malloc(size);
 }
 
 template <class T>
@@ -91,7 +91,8 @@ void test_object_pool() {
 		return true;
 	});
 
-	// Should count the number of active objects in the pool, and deactivate them
+	// Should count the number of active objects in the pool, and deactivate
+	// them
 	int count = 0;
 	pool.map([&count](int &state) {
 		count++;
@@ -100,10 +101,10 @@ void test_object_pool() {
 	std::cout << count << std::endl;
 
 	// The count should now be 0
-    count = 0;
-    pool.map([&count](int &state) {
-      count++;
-      return false;
-    });
-    std::cout << count << std::endl;
+	count = 0;
+	pool.map([&count](int &state) {
+		count++;
+		return false;
+	});
+	std::cout << count << std::endl;
 }

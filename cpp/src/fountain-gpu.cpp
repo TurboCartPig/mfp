@@ -187,7 +187,8 @@ struct ParticleGroup {
 
 	~ParticleGroup() {
 		glDeleteBuffers(1, &vbo);
-		// FIXME: This makes the program stop drawing for some reason?, Previous mem leak was due to this.
+		// FIXME: This makes the program stop drawing for some reason?, Previous
+		// mem leak was due to this.
 		glDeleteVertexArrays(1, &vao);
 	}
 };
@@ -307,12 +308,12 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 }
 
 int main() {
-    // Init randomness
-    // *******************************************************************
-    std::random_device rd;
-    std::default_random_engine generator(rd());
-    std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-    rnd = std::bind(distribution, generator);
+	// Init randomness
+	// *******************************************************************
+	std::random_device                    rd;
+	std::default_random_engine            generator(rd());
+	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+	rnd = std::bind(distribution, generator);
 
 	// Setup window
 	sf::ContextSettings context(24, 8, 0, 4, 5,
