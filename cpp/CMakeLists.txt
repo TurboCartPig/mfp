@@ -22,34 +22,38 @@ find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 find_package(GLEW 2.1 REQUIRED COMPONENTS GLEW)
 
+add_library(common INTERFACE)
+target_link_libraries(common INTERFACE sfml-graphics)
+target_precompile_headers(common INTERFACE src/common.h)
+
 add_executable(solar src/solar.cpp)
-target_link_libraries(solar sfml-graphics)
+target_link_libraries(solar PRIVATE common)
 
 add_executable(inter src/inter.cpp)
-target_link_libraries(inter sfml-graphics)
+target_link_libraries(inter PRIVATE common)
 
 add_executable(interab src/interab.cpp)
-target_link_libraries(interab sfml-graphics)
+target_link_libraries(interab PRIVATE common)
 
 add_executable(msi src/midpoint-displacement.cpp)
-target_link_libraries(msi sfml-graphics)
+target_link_libraries(msi PRIVATE common)
 
 add_executable(perlin src/perlin.cpp)
-target_link_libraries(perlin sfml-graphics)
+target_link_libraries(perlin PRIVATE common)
 
 add_executable(boids src/boids.cpp)
-target_link_libraries(boids sfml-graphics)
+target_link_libraries(boids PRIVATE common)
 
 add_executable(fountain src/fountain.cpp)
-target_link_libraries(fountain sfml-graphics)
+target_link_libraries(fountain PRIVATE common)
 
 add_executable(fountain-gpu src/fountain-gpu.cpp)
-target_link_libraries(fountain-gpu sfml-window OpenGL::GL GLEW::GLEW)
+target_link_libraries(fountain-gpu PRIVATE sfml-window OpenGL::GL GLEW::GLEW)
 
 add_executable(quat src/quat.cpp)
-target_link_libraries(quat sfml-system)
+target_link_libraries(quat PRIVATE sfml-system)
 
 add_executable(billiard src/billiard.cpp)
-target_link_libraries(billiard sfml-graphics)
+target_link_libraries(billiard PRIVATE common)
 
 add_executable(binary-ops src/binary-ops.cpp)
