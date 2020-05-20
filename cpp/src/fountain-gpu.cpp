@@ -7,6 +7,13 @@
  * constant. Which means that we can not dynamically add forces and have
  * particles be effected by them.
  *
+ * Based on:
+ * @see [Parametric
+ * Particles](https://www.genericgamedev.com/effects/parametric-particles/)
+ * @see
+ * [Parametric GPU Accelerated
+ * Particles](https://www.genericgamedev.com/effects/parametric-gpu-accelerated-particles/)
+ *
  * TODO: Write a system based on transform feedback
  * @see [Particle System using Transform
  * Feedback](http://ogldev.atspace.co.uk/www/tutorial28/tutorial28.html)

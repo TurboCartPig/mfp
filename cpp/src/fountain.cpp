@@ -37,21 +37,6 @@ std::function<float()>             rnd;
 
 /**
  * A simple particle object.
- *
- * TODO: In order to turn this into a GPU particle, I need to:
- * 1. Make it immutable via using parametric integration
- * 2. Implement a separate particle emitter that can handle spawning and storing
- * the particles
- * 3. Upload the particles to a buffer
- * 4. Use vertex shader to simulate physics and find current position of
- * particle
- * 5. Use geometry shader to project particle to screen and generate a screen
- * aligned billboard
- * 6. Use fragment shader to draw the particle
- *
- * @see https://www.genericgamedev.com/effects/parametric-particles/
- * @see
- * https://www.genericgamedev.com/effects/parametric-gpu-accelerated-particles/
  */
 class PhysicsObject {
   public:
