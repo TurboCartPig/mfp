@@ -24,22 +24,9 @@ const sf::Vector2f center(WINDOWX / 2.0f,
 // ***********************************************************************
 sf::Vector2f square(float i);
 sf::Vector2f circle(float i);
-sf::Vector2f lerp(sf::Vector2f a, sf::Vector2f b, float n);
 
 // Functions
 // ***********************************************************************
-
-/**
- * Linear interpolation between two points.
- *
- * @param p_0 - The first point.
- * @param p_1 - The second point.
- * @param t   - t decides the degree of interpolation from p_0 to p_1.
- * @return    - The result of the interpolation.
- */
-sf::Vector2f lerp(sf::Vector2f a, sf::Vector2f b, float t) {
-	return (1.0f - t) * a + t * b;
-}
 
 /*
  * Point on square from angle.
