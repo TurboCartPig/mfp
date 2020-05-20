@@ -20,7 +20,7 @@ endif ()
 
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-find_package(GLEW 2.1 REQUIRED COMPONENTS GLEW)
+find_package(glbinding REQUIRED COMPONENTS glbinding)
 
 add_library(common INTERFACE)
 target_link_libraries(common INTERFACE sfml-graphics)
@@ -48,7 +48,7 @@ add_executable(fountain src/fountain.cpp)
 target_link_libraries(fountain PRIVATE common)
 
 add_executable(fountain-gpu src/fountain-gpu.cpp)
-target_link_libraries(fountain-gpu PRIVATE sfml-window OpenGL::GL GLEW::GLEW)
+target_link_libraries(fountain-gpu PRIVATE sfml-window OpenGL::GL glbinding::glbinding glbinding::glbinding-aux)
 
 add_executable(quat src/quat.cpp)
 target_link_libraries(quat PRIVATE sfml-system)

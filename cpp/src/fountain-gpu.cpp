@@ -24,13 +24,20 @@
 
 #define _USE_MATH_DEFINES
 
-#include <GL/glew.h>
 #include <SFML/Window.hpp>
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <functional>
+#include <glbinding-aux/debug.h>
+#include <glbinding/Binding.h>
+#include <glbinding/gl/gl.h>
+#include <glbinding/glbinding.h>
 #include <iostream>
 #include <random>
+
+using namespace glbinding;
+using namespace gl;
 
 // Constants
 // ***********************************************************************
@@ -116,14 +123,14 @@ ShaderProgram::ShaderProgram(std::vector<std::string> &paths) {
 		glCompileShader(shader);
 
 		// Get the compile status
-		GLint success;
-		char  log[512];
+		GLboolean success;
+		char      log[512];
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 		glGetShaderInfoLog(shader, 512, nullptr, log);
 
 		std::cout << "Compiling shader: " << path << std::endl;
 		if (success == GL_FALSE) {
-			std::cout << "\tShader type: " << type << std::endl;
+			std::cout << "\tShader type: " << (int)type << std::endl;
 			std::cout << "\tSource code:\n" << source << std::endl;
 			std::cout << "\tCompilation status: " << (bool)success << std::endl;
 			std::cout << "\tCompilation log:\n" << log << std::endl;
@@ -140,8 +147,8 @@ ShaderProgram::ShaderProgram(std::vector<std::string> &paths) {
 	glLinkProgram(program);
 
 	// Get the link status
-	GLint success;
-	char  log[512];
+	GLboolean success;
+	char      log[512];
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	glGetProgramInfoLog(program, 512, nullptr, log);
 
@@ -185,12 +192,8 @@ struct ParticleGroup {
 	 *
 	 * @param c Number of particles in the group
 	 */
-	ParticleGroup(const size_t c, const sf::Vector2f a) {
-		count = c;
-		vao = vbo = 0;
-		lifetime  = 0.0f;
-		acc       = a;
-	}
+	ParticleGroup(const size_t c, const sf::Vector2f a)
+	    : count(c), vao(0), vbo(0), acc(a), lifetime(0.0f) {}
 
 	~ParticleGroup() {
 		glDeleteBuffers(1, &vbo);
@@ -235,10 +238,12 @@ void ParticleEmitter::draw(float dt) {
 
 	// Delete dead particle groups
 	std::cout << "ParticleGroups size: " << particleGroups.size() << std::endl;
-	particleGroups.erase(
-	    std::remove_if(particleGroups.begin(), particleGroups.end(),
-	                   [](ParticleGroup &pg) { return pg.lifetime > 2.0f; }),
-	    particleGroups.end());
+	particleGroups.erase(std::remove_if(particleGroups.begin(),
+	                                    particleGroups.end(),
+	                                    [](const ParticleGroup &pg) {
+		                                    return pg.lifetime > 2.0f;
+	                                    }),
+	                     particleGroups.end());
 	std::cout << "ParticleGroups size after: " << particleGroups.size()
 	          << std::endl;
 
@@ -281,9 +286,7 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 
 	// Make vertex array object
 	glGenVertexArrays(1, &pg.vao);
-	std::cout << "Gen: " << glewGetErrorString(glGetError()) << std::endl;
 	glBindVertexArray(pg.vao);
-	std::cout << "Bind: " << glewGetErrorString(glGetError()) << std::endl;
 
 	// Make a vertex buffer and set the vertex format
 	// Make vertex buffer object
@@ -308,8 +311,6 @@ void ParticleEmitter::emit(size_t count, sf::Vector2f pos, sf::Vector2f vel,
 	// Unbind buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
-	//	std::cout << glewGetErrorString(glGetError()) << std::endl;
 
 	particleGroups.push_back(pg);
 }
@@ -340,10 +341,15 @@ int main() {
 	          << "\n\tStencil bits: " << s.stencilBits
 	          << "\n\tAntialiasing level: " << s.antialiasingLevel << std::endl;
 
-	// Setup glew
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK)
-		std::cout << "Error: GLEW Failed to initialize\n";
+	// Init glbindings
+	Binding::initialize(
+	    [](const char *name) {
+		    return (ProcAddress)sf::Context::getActiveContext()->getFunction(
+		        name);
+	    },
+	    true);
+
+	aux::enableGetErrorCallback();
 
 	// Setup opengl
 	glEnable(GL_BLEND);
