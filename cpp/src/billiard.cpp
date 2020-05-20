@@ -6,13 +6,8 @@
  * @file billiard.cpp
  */
 
+#include "common.h"
 #include "math.h"
-
-#include <SFML/Graphics.hpp>
-#include <functional>
-#include <iostream>
-#include <random>
-#include <vector>
 
 // Constants
 // ***********************************************************************

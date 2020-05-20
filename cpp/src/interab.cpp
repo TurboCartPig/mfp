@@ -7,12 +7,7 @@
  *  @file interab.cpp
  */
 
-#define _USE_MATH_DEFINES
-
-#include <SFML/Graphics.hpp>
-#include <cmath>
-#include <functional>
-#include <iostream>
+#include "common.h"
 
 const uint32_t WINDOWX = 1200;
 const uint32_t WINDOWY = 800;

@@ -5,15 +5,7 @@
  *  @file midpoint-displacement.cpp
  */
 
-#define _USE_MATH_DEFINES
-
-#include <SFML/Graphics.hpp>
-#include <cmath>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <random>
-#include <vector>
+#include "common.h"
 
 constexpr uint32_t WINDOWX = 1200;
 constexpr uint32_t WINDOWY = 800;

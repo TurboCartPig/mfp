@@ -13,15 +13,8 @@
  * @file fountain.cpp
  */
 
-#define _USE_MATH_DEFINES
-
+#include "common.h"
 #include "math.h"
-
-#include <SFML/Graphics.hpp>
-#include <functional>
-#include <iostream>
-#include <random>
-#include <vector>
 
 // Constants
 // ***********************************************************************

@@ -7,11 +7,8 @@
  *  @file inter.cpp
  */
 
-#define _USE_MATH_DEFINES
-
-#include <SFML/Graphics.hpp>
-#include <cmath>
-#include <iostream>
+#include "common.h"
+#include "math.h"
 
 // Constants
 // ***********************************************************************

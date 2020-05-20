@@ -5,14 +5,7 @@
  * @file perlin.cpp
  */
 
-#define _USE_MATH_DEFINES
-
-#include <SFML/Graphics.hpp>
-#include <cmath>
-#include <functional>
-#include <iostream>
-#include <random>
-#include <vector>
+#include "common.h"
 
 // Constants
 // ***********************************************************************

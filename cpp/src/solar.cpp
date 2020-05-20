@@ -5,11 +5,7 @@
  * @file solar.cpp
  */
 
-#define _USE_MATH_DEFINES
-
-#include "SFML/Graphics.hpp"
-
-#include <cmath>
+#include "common.h"
 
 const int WINDOWX = 1200;
 const int WINDOWY = 800;

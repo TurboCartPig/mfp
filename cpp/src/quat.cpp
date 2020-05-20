@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 
-#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 #include <cmath>
 #include <iostream>
 

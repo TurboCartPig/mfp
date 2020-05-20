@@ -1,7 +1,6 @@
 #pragma once
 
-#include <SFML/System.hpp>
-#include <cmath>
+//#include "common.h"
 
 /**
  * Map a value in a range to a value equally far between min and max in
