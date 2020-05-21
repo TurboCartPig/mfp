@@ -357,9 +357,9 @@ int main() {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Setup shaders
-	std::vector<std::string> paths = {"../src/fountain-gpu.vert",
-	                                  "../src/fountain-gpu.geom",
-	                                  "../src/fountain-gpu.frag"};
+	std::vector<std::string> paths = {"../assets/shaders/fountain-gpu.vert",
+	                                  "../assets/shaders/fountain-gpu.geom",
+	                                  "../assets/shaders/fountain-gpu.frag"};
 	ShaderProgram            program(paths);
 	program.use();
 

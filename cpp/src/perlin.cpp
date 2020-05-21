@@ -200,7 +200,7 @@ int main() {
 	}
 
 	sf::Image dumb;
-	if (!dumb.loadFromFile("../dumb.png")) {
+	if (!dumb.loadFromFile("../assets/dumb.png")) {
 		std::cout << "Error: Texture not created" << std::endl;
 		exit(EXIT_FAILURE);
 	}
