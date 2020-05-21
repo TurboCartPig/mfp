@@ -1,10 +1,10 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,-modernize-use-nodiscard,-modernize-use-trailing-return-type,performance-*,portability-*,bugprone-*,readability-*,-readability-magic-numbers,-readability-uppercase-literal-suffix,-readability-braces-around-statements'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,-modernize-use-nodiscard,-modernize-use-trailing-return-type,performance-*,portability-*,bugprone-*,readability-*,-readability-magic-numbers,-readability-uppercase-literal-suffix,-readability-braces-around-statements'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
-FormatStyle:     file
-User:            dennis
+FormatStyle: file
+User: dennis
 CheckOptions:
   - key:             bugprone-argument-comment.CommentBoolLiterals
     value:           '0'
@@ -241,4 +241,3 @@ CheckOptions:
   - key:             readability-static-accessed-through-instance.NameSpecifierNestingThreshold
     value:           '3'
 ...
-
