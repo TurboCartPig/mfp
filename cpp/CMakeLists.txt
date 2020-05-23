@@ -1,21 +1,38 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(MFP LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+message("Debug: ${CMAKE_CXX_FLAGS_DEBUG}")
+message("Release: ${CMAKE_CXX_FLAGS_RELEASE}")
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(/W4 /w44265 /w44062 /wd4061) # Warnings
-    add_compile_options(/utf-8 /arch:AVX2)
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang | GNU")
-    add_compile_options(-Wall -Wextra -Wunreachable-code -Wpedantic -Wdocumentation)
-    add_compile_options(-mtune=generic -march=x86_64 -mavx2)
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang | AppleClang")
-        add_compile_options(-Wweak-vtables -Wexit-time-destructors -Wglobal-constructors -Wmissing-noreturn)
-        add_compile_options(-fsanitize=undefined,address)
-    endif ()
+    add_compile_options(
+            # FIXME: Do I need this?
+            /utf-8
+            # Turn on warnings
+            /W4 /w44265 /w44062 /wd4061
+            # Reasonably well supported by now
+            /arch:AVX2
+    )
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
+    add_compile_options(
+            # Turn on warnings
+            -Wall -Wextra -Wunreachable-code -Wpedantic
+            -Wdocumentation -Wweak-vtables -Wexit-time-destructors
+            -Wglobal-constructors -Wmissing-noreturn
+            # Reasonably well supported base platform
+            -march=skylake
+            # Turn on sanitizers if build type is debug
+            $<$<CONFIG:DEBUG>:-fsanitize=undefined,address>
+    )
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    message("Warning: GCC has not been well tested yet; Consider using Clang")
+else ()
+    message("Warning: Your compiler is not supported!")
 endif ()
 
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
@@ -48,7 +65,14 @@ add_executable(fountain src/fountain.cpp)
 target_link_libraries(fountain PRIVATE common)
 
 add_executable(fountain-gpu src/fountain-gpu.cpp)
-target_link_libraries(fountain-gpu PRIVATE sfml-window OpenGL::GL glbinding::glbinding glbinding::glbinding-aux)
+target_link_libraries(
+            fountain-gpu
+        PRIVATE
+            sfml-window
+            OpenGL::GL
+            glbinding::glbinding
+            glbinding::glbinding-aux
+)
 
 add_executable(quat src/quat.cpp)
 target_link_libraries(quat PRIVATE sfml-system)
