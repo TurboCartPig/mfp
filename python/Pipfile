@@ -6,4 +6,3 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-numpy = "*"
