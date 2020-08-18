@@ -4,36 +4,50 @@ project(MFP LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(MATCHES ${CMAKE_BUILD_TYPE} "Debug")
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  execute_process(
+    COMMAND ln -sf ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/compile_commands.json
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+endif()
 
 message("Debug: ${CMAKE_CXX_FLAGS_DEBUG}")
 message("Release: ${CMAKE_CXX_FLAGS_RELEASE}")
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(
-            # FIXME: Do I need this?
-            /utf-8
-            # Turn on warnings
-            /W4 /w44265 /w44062 /wd4061
-            # Reasonably well supported by now
-            /arch:AVX2
-    )
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
-    add_compile_options(
-            # Turn on warnings
-            -Wall -Wextra -Wunreachable-code -Wpedantic
-            -Wdocumentation -Wweak-vtables -Wexit-time-destructors
-            -Wglobal-constructors -Wmissing-noreturn
-            # Reasonably well supported base platform
-            -march=skylake
-            # Turn on sanitizers if build type is debug
-            $<$<CONFIG:DEBUG>:-fsanitize=undefined,address>
-    )
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    message("Warning: GCC has not been well tested yet; Consider using Clang")
-else ()
-    message("Warning: Your compiler is not supported!")
-endif ()
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  add_compile_options(
+    # FIXME: Do I need this?
+    /utf-8
+    # Turn on warnings
+    /W4
+    /w44265
+    /w44062
+    /wd4061
+    # Reasonably well supported by now
+    /arch:AVX2)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
+  add_compile_options(
+    # Turn on warnings
+    -Wall
+    -Wextra
+    -Wunreachable-code
+    -Wpedantic
+    -Wdocumentation
+    -Wweak-vtables
+    -Wexit-time-destructors
+    -Wglobal-constructors
+    -Wmissing-noreturn
+    # Reasonably well supported base platform
+    -march=skylake
+    # Turn on sanitizers if build type is debug
+    $<$<CONFIG:DEBUG>:-fsanitize=undefined,address>)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  message("Warning: GCC has not been well tested yet; Consider using Clang")
+else()
+  message("Warning: Your compiler is not supported!")
+endif()
 
 find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
@@ -66,13 +80,8 @@ target_link_libraries(fountain PRIVATE common)
 
 add_executable(fountain-gpu src/fountain-gpu.cpp)
 target_link_libraries(
-            fountain-gpu
-        PRIVATE
-            sfml-window
-            OpenGL::GL
-            glbinding::glbinding
-            glbinding::glbinding-aux
-)
+  fountain-gpu PRIVATE sfml-window OpenGL::GL glbinding::glbinding
+                       glbinding::glbinding-aux)
 
 add_executable(quat src/quat.cpp)
 target_link_libraries(quat PRIVATE sfml-system)
