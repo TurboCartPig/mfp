@@ -32,7 +32,7 @@ std::function<float()>        rnd;
 class Boid {
   public:
 	Boid();
-	virtual ~Boid() {}
+	virtual ~Boid() = default;
 	virtual void update(float dt);
 	void         draw(sf::RenderWindow &w);
 	sf::Vector2f getPosition() const;
