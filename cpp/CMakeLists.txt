@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
-project(MFP LANGUAGES CXX)
+project(
+  MFP
+  VERSION 0.1.0
+  DESCRIPTION "Exercises from BMA1020 - Mattematikk for programming"
+  LANGUAGES CXX)
 
-# Set the C++ standard to use
+# Set the C++ standard to use globally
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -41,7 +45,7 @@ find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 find_package(glbinding REQUIRED COMPONENTS glbinding)
 
-# Setup individual excersises as bulidable targets
+# Setup individual exercises as buildable targets
 # ******************************************************************
 
 add_executable(solar src/solar.cpp)
