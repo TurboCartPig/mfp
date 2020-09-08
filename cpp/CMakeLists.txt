@@ -30,14 +30,11 @@ set(PRIVATE_COMPILE_OPTIONS
     $<$<CXX_COMPILER_ID:MSVC>:/w44061>
     $<$<CXX_COMPILER_ID:MSVC>:/w44062>
     $<$<CXX_COMPILER_ID:MSVC>:/w44265>
-    $<$<CXX_COMPILER_ID:MSVC>:/arch:AVX2>
     $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wall>
     $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wextra>
     $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wpedantic>
     $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wunreachable-code>
     $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wmissing-noreturn>
-    $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-march=skylake>
-    $<$<AND:$<CXX_COMPILER_ID:Clang,AppleClang,GNU>,$<CONFIG:DEBUG>>:-fsanitize=undefined,address>
     $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wdocumentation>
     $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wweak-vtables>
     $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wexit-time-destructors>
