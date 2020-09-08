@@ -22,26 +22,10 @@ std::function<float()>    rnd;
 // Helper functions
 // ***********************************************************************
 
-/**
- * Linear interpolation between two points.
- *
- * @param a - The first point.
- * @param a - The second point.
- * @param t - t decides the degree of interpolation from a to b.
- * @return  - The result of the interpolation.
- */
-template <class T>
-T lerp(T a, T b, float t) {
-	return (1.0f - t) * a + t * b;
-}
-
 // vector floor
 sf::Vector2f floor(sf::Vector2f a) {
 	return sf::Vector2f(floor(a.x), floor(a.y));
 }
-
-// vector dot product
-float dot(sf::Vector2f a, sf::Vector2f b) { return a.x * b.x + a.y * b.y; }
 
 /**
  * Fraction. Get the fraction part of a type.
@@ -81,7 +65,7 @@ float perlin(sf::Vector2f p, float tilesize) {
 	auto i = floor(p);
 	auto f = fract(p);
 
-	// Sample psudo random values for the four corners
+	// Sample pseudo random values for the four corners
 	auto c1 = random(i);
 	auto c2 = random(i + sf::Vector2f(1.0f, 0.0f));
 	auto c3 = random(i + sf::Vector2f(0.0f, 1.0f));

@@ -41,40 +41,35 @@ find_package(SFML 2.5 REQUIRED COMPONENTS graphics window system)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 find_package(glbinding REQUIRED COMPONENTS glbinding)
 
-# Make a common set of libraries into one target and precompile a header file
-add_library(common INTERFACE)
-target_link_libraries(common INTERFACE sfml-graphics)
-target_precompile_headers(common INTERFACE src/common.h)
-
 # Setup individual excersises as bulidable targets
 # ******************************************************************
 
 add_executable(solar src/solar.cpp)
-target_link_libraries(solar PRIVATE common)
+target_link_libraries(solar PRIVATE sfml-graphics)
 target_compile_options(solar PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(inter src/inter.cpp)
-target_link_libraries(inter PRIVATE common)
+target_link_libraries(inter PRIVATE sfml-graphics)
 target_compile_options(inter PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(interab src/interab.cpp)
-target_link_libraries(interab PRIVATE common)
+target_link_libraries(interab PRIVATE sfml-graphics)
 target_compile_options(interab PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(mpd src/midpoint-displacement.cpp)
-target_link_libraries(mpd PRIVATE common)
+target_link_libraries(mpd PRIVATE sfml-graphics)
 target_compile_options(mpd PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(perlin src/perlin.cpp)
-target_link_libraries(perlin PRIVATE common)
+target_link_libraries(perlin PRIVATE sfml-graphics)
 target_compile_options(perlin PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(boids src/boids.cpp)
-target_link_libraries(boids PRIVATE common)
+target_link_libraries(boids PRIVATE sfml-graphics)
 target_compile_options(boids PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(fountain src/fountain.cpp)
-target_link_libraries(fountain PRIVATE common)
+target_link_libraries(fountain PRIVATE sfml-graphics)
 target_compile_options(fountain PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(fountain-gpu src/fountain-gpu.cpp)
@@ -88,7 +83,7 @@ target_link_libraries(quat PRIVATE sfml-system)
 target_compile_options(quat PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(billiard src/billiard.cpp)
-target_link_libraries(billiard PRIVATE common)
+target_link_libraries(billiard PRIVATE sfml-graphics)
 target_compile_options(billiard PRIVATE ${PRIVATE_COMPILE_OPTIONS})
 
 add_executable(binary-ops src/binary-ops.cpp)
