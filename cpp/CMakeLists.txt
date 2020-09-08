@@ -21,6 +21,9 @@ if(CONFIG EQUAL DEBUG)
       ${CMAKE_SOURCE_DIR}/compile_commands.json)
 endif()
 
+# Enable LTO globally
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+
 # List all the compiler options for internal use
 set(PRIVATE_COMPILE_OPTIONS
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
