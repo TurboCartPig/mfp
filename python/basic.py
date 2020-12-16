@@ -3,7 +3,7 @@
 """
 Created on Wed Mar  4 08:22:20 2020
 
-@author: dennis
+@author: Dennis Kristiansen, NTNU
 """
 
 print("Hello")
@@ -183,9 +183,9 @@ print(len(comb))
 def num_ace(hand):
     # ace = 1, 14, 27, 40
     # a = [x for x in hand if x == 1 or x == 14 or x == 27 or x == 40]
-    
+
     # ace = 0,1,2,3
-    a = [x for x in hand if value(x-1) == 0]
+    a = [x for x in hand if value(x - 1) == 0]
     return len(a)
 
 

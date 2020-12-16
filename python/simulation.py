@@ -3,7 +3,7 @@
 """
 Created on Tue Mar 10 14:31:03 2020
 
-@author: dennis
+@author: Dennis Kristiansen, NTNU
 """
 
 from random import randint, random, shuffle, uniform, choice
@@ -45,12 +45,16 @@ radius = 2
 for i in range(num_sim):
     # Random coord in encapsulating box
     coord = (uniform(-2.0, 4.0), uniform(-2.0, 2.0))
-    intersections = len([c for c in circles if (
-                                                (coord[0] - c[0]) ** 2
-                                              + (coord[1] - c[1]) ** 2
-                                                ) <= radius ** 2])
+    intersections = len(
+        [
+            c
+            for c in circles
+            if ((coord[0] - c[0]) ** 2 + (coord[1] - c[1]) ** 2) <= radius ** 2
+        ]
+    )
     # Hit both, in intersection
-    if intersections == 2: hits += 1
+    if intersections == 2:
+        hits += 1
 
 area = 24 * hits / num_sim
 

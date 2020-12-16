@@ -3,7 +3,7 @@
 """
 Created on Thu Mar  5 14:14:45 2020
 
-@author: dennis
+@author: Dennis Kristiansen, NTNU
 """
 
 # Note: b changes - lists passed by referance
@@ -30,6 +30,7 @@ print(c)
 
 # Deep copy
 from copy import deepcopy
+
 a = [1, 2, 3]
 b = [a, a]
 c = deepcopy(b)
@@ -82,13 +83,16 @@ def num_aces(hand):
     return len([card for card in hand if value(card) == 0])
 
 
-event = [hand for hand in sample if num_aces(hand) > 0] # Every hand with at least one ace
+event = [
+    hand for hand in sample if num_aces(hand) > 0
+]  # Every hand with at least one ace
 
-print("The probability is:", len(event),\
-      "/", len(sample), "=", len(event)/len(sample))
+print(
+    "The probability is:", len(event), "/", len(sample), "=", len(event) / len(sample)
+)
 
 # Dice
-dice = list(range(1,7))
+dice = list(range(1, 7))
 sample = list(it.product(dice, repeat=2))
 print(sample)
 
@@ -103,8 +107,8 @@ print(len(sample))
 doors = [False for i in range(1024)]
 
 for i in range(1024):
-    doors[i::i+1] = [not state for state in doors[i::i+1]]
-    #for j in range(i, 1024, i + 1):
+    doors[i :: i + 1] = [not state for state in doors[i :: i + 1]]
+    # for j in range(i, 1024, i + 1):
     #    doors[j] = not doors[j]
 
 # doors = [[not doors[j] for j in range(i, 1024, i + 1)] for i in range(1024)]
@@ -124,7 +128,7 @@ for i in range(num_sim):
     x = rnd.random()
     y = rnd.random()
 
-    if (sqrt(x * x + y * y) <= 1.0):
+    if sqrt(x * x + y * y) <= 1.0:
         hits += 1
 
 print("The area is:", hits / num_sim)
@@ -142,16 +146,16 @@ for i in range(num_sim):
     if d1 == 6 or d2 == 6:
         hits += 1
 
-print("The probability is:", hits/ num_sim, 11/36)
+print("The probability is:", hits / num_sim, 11 / 36)
 
 hits = 0
 for i in range(num_sim):
     roll = [rnd.randint(1, 6) for i in range(5)]
-    
+
     if len([dice for dice in roll if dice == roll[0]]) == 5:
         hits += 1
 
-print("The probability is:", hits/num_sim)
+print("The probability is:", hits / num_sim)
 
 
 # Card simulation
@@ -163,14 +167,13 @@ deck = list(range(0, 52))
 for i in range(num_sim):
     rnd.shuffle(deck)
     hand = deck[:5]
-    
+
     if num_aces(hand) > 2:
         hits += 1
 
-print("The probability is:", hits/num_sim)
+print("The probability is:", hits / num_sim)
 
 
 # Classes and dictionaries are not covered
 # pygame - python game framework
 # Reading - map, filter, reduce
-

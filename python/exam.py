@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Dennis Kristiansen, NTNU
+"""
+
 lst0 = list(range(10000))
 
 # i)
@@ -47,7 +53,7 @@ lst0 = list(range(100))
 #         if i*j > 5000:
 #             print(i,"*",j,"=",i*j)
 
-[print(i,"*",j,"=",i*j) for i in lst0 for j in lst0 if i*j > 5000]
+[print(i, "*", j, "=", i * j) for i in lst0 for j in lst0 if i * j > 5000]
 
 # x)
 lst1 = []
@@ -88,13 +94,13 @@ E = [roll for roll in S if unique(roll)]
 # Printout: Probability is 3750 / 7776
 print("Probability is", len(E), "/", len(S))
 
-people = ['a', 'b', 'c', 'd', 'e']
+people = ["a", "b", "c", "d", "e"]
 S = list(permutations(people, len(people)))
 
 
 def next_to(perm):
-    index_1 = perm.index('a')
-    index_10 = perm.index('b')
+    index_1 = perm.index("a")
+    index_10 = perm.index("b")
     return index_1 + 1 == index_10 or index_1 - 1 == index_10
 
 

@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Dennis Kristiansen, NTNU
+"""
+
 from functools import reduce
 from itertools import combinations, product, permutations
 
@@ -37,7 +43,7 @@ print(list(l))
 
 doors = [False for i in range(1024)]
 for i in range(1024):
-    doors[i::i+1] = [not state for state in doors[i::i+1]]
+    doors[i :: i + 1] = [not state for state in doors[i :: i + 1]]
 doors = [i + 1 for i in range(1024) if doors[i]]
 print(doors)
 
@@ -47,7 +53,7 @@ doors = list(map(lambda _: False, range(1024)))
 
 # TODO: Can I do this differently, ie. avoid using subscripting?
 for i in range(1024):
-    doors[i::i+1] = map(lambda door: not door, doors[i::i+1])
+    doors[i :: i + 1] = map(lambda door: not door, doors[i :: i + 1])
 
 # List door numbers for open doors
 doors = map(lambda tu: tu[0] + 1, filter(lambda tu: tu[1], enumerate(doors)))
@@ -84,7 +90,11 @@ def value(card):
 def full_house(hand):
     hand = sorted(map(lambda card: value(card), hand))  # Note
     # 2 first and 2 last are equal and the middle card is equal to ether the first 2 or the last 2
-    return hand[0] == hand[1] and hand[3] == hand[4] and (hand[2] == hand[0] or hand[2] == hand[3])
+    return (
+        hand[0] == hand[1]
+        and hand[3] == hand[4]
+        and (hand[2] == hand[0] or hand[2] == hand[3])
+    )
 
 
 E = list(filter(lambda hand: full_house(hand), S))  # Note
@@ -96,8 +106,12 @@ print("Probability is", len(E), "/", len(S))
 # Probability of drawing 4 jacks in a hand of 5 cards
 cards = list(range(52))
 S = list(combinations(cards, 5))
-E = list(filter(lambda jacks: jacks == 4,
-                map(lambda hand: len(list(filter(lambda card: value(card) == 11, hand))), S)))  # Note
+E = list(
+    filter(
+        lambda jacks: jacks == 4,
+        map(lambda hand: len(list(filter(lambda card: value(card) == 11, hand))), S),
+    )
+)  # Note
 
 # Printout: Probability is 48 / 2598960
 print("Probability is", len(E), "/", len(S))

@@ -3,7 +3,7 @@
 """
 Created on Tue Mar 10 14:30:44 2020
 
-@author: dennis
+@author: Dennis Kristiansen, NTNU
 """
 
 from itertools import combinations, product, permutations
@@ -44,7 +44,11 @@ def full_house(hand):
     hand = [value(x) for x in hand]
     hand.sort()
     # 2 first and 2 last are equal and the middle card is equal to ether the first 2 or the last 2
-    return hand[0] == hand[1] and hand[3] == hand[4] and (hand[2] == hand[0] or hand[2] == hand[3])
+    return (
+        hand[0] == hand[1]
+        and hand[3] == hand[4]
+        and (hand[2] == hand[0] or hand[2] == hand[3])
+    )
 
 
 E = [hand for hand in S if full_house(hand)]
