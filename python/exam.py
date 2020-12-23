@@ -79,7 +79,7 @@ lst1 = list(map(print, (map(lambda x: list(range(x)), range(100)))))
 
 print("\nProbability:\n")
 
-from itertools import combinations, product, permutations
+from itertools import combinations, permutations, product
 
 dice = [1, 2, 3, 4, 5, 6]
 S = list(product(dice, repeat=5))
